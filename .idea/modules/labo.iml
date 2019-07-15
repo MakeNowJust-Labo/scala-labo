@@ -14,10 +14,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.13.0:jar" level="project" />
     <orderEntry type="module" module-name="modules-nyan" exported="" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.13.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.github.mpilquist:simulacrum_2.13:0.19.0:jar" level="project" />
-    <orderEntry type="module" module-name="nyan-free" exported="" />
-    <orderEntry type="library" name="sbt: com.github.scalaprops:scalaprops-core_2.13:0.6.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.scalaprops:scalaprops-gen_2.13:0.6.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.github.scalaprops:scalaprops-core_2.13:0.6.0:jar" level="project" />
+    <orderEntry type="module" module-name="nyan-free" exported="" />
+    <orderEntry type="library" name="sbt: com.github.mpilquist:simulacrum_2.13:0.19.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.13.0:jar" level="project" />
   </component>
 </module>
