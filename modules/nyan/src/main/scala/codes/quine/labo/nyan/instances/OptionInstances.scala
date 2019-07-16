@@ -12,8 +12,8 @@ trait OptionInstances {
     @tailrec
     override def tailRecM[A, B](a: A)(f: A => Option[Either[A, B]]): Option[B] =
       f(a) match {
-        case None => None
-        case Some(Left(x)) => tailRecM(x)(f)
+        case None           => None
+        case Some(Left(x))  => tailRecM(x)(f)
         case Some(Right(y)) => Some(y)
       }
 

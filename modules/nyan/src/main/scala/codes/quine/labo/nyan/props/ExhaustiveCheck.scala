@@ -15,10 +15,11 @@ object ExhaustiveCheck {
     lazy val values: Set[Set[A]] = ExhaustiveCheck[A].values.subsets.toSet
   }
 
-  implicit def Tuple2ExhaustiveCheck[A: ExhaustiveCheck, B: ExhaustiveCheck]: ExhaustiveCheck[(A, B)] = new ExhaustiveCheck[(A, B)] {
-    lazy val values: Set[(A, B)] = for {
-      a <- ExhaustiveCheck[A].values
-      b <- ExhaustiveCheck[B].values
-    } yield (a, b)
-  }
+  implicit def Tuple2ExhaustiveCheck[A: ExhaustiveCheck, B: ExhaustiveCheck]: ExhaustiveCheck[(A, B)] =
+    new ExhaustiveCheck[(A, B)] {
+      lazy val values: Set[(A, B)] = for {
+        a <- ExhaustiveCheck[A].values
+        b <- ExhaustiveCheck[B].values
+      } yield (a, b)
+    }
 }

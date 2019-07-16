@@ -9,7 +9,7 @@ trait Function1Instances {
 
     def lift[A, B](f: A => B): A => B = f
 
-    def first[A, B, C](f: A  => B): ((A, C)) => (B, C) = {
+    def first[A, B, C](f: A => B): ((A, C)) => (B, C) = {
       case (a, c) => (f(a), c)
     }
   }

@@ -21,7 +21,7 @@ object Id {
 
     @tailrec
     override def tailRecM[A, B](a: A)(f: A => Id[Either[A, B]]): Id[B] = f(a) match {
-      case Id(Left(x)) => tailRecM(x)(f)
+      case Id(Left(x))  => tailRecM(x)(f)
       case Id(Right(y)) => Id(y)
     }
 

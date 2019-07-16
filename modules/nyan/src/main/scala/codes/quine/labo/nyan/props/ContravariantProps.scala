@@ -25,7 +25,7 @@ trait ContravariantProps[F[_]] {
                              efa: Eq[F[A]],
                              efc: Eq[F[C]]): Properties[NyanLaw] = Properties.properties(NyanLaw.contravariant)(
     NyanLaw.contravariantIdentity -> contravariantIdentity[A],
-    NyanLaw.contravariantComposition -> contravariantComposition[A, B, C],
+    NyanLaw.contravariantComposition -> contravariantComposition[A, B, C]
   )
 }
 

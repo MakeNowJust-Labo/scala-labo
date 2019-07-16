@@ -10,9 +10,9 @@ trait VectorInstances {
     @tailrec
     def eqv(x: Vector[A], y: Vector[A]): Boolean =
       (x, y) match {
-        case (Vector(), Vector()) => true
+        case (Vector(), Vector())          => true
         case (a +: xs, b +: ys) if a === b => eqv(xs, ys)
-        case _ => false
+        case _                             => false
       }
   }
 
@@ -27,14 +27,15 @@ trait VectorInstances {
       @tailrec
       def go(stack: List[Vector[Either[A, B]]]): Unit =
         stack match {
-          case Nil => ()
+          case Nil              => ()
           case Vector() :: tail => go(tail)
-          case (ab +: abs) :: tail => ab match {
-            case Right(b) =>
-              buf += b
-              go(tail)
-            case Left(a) => go(f(a) :: abs :: tail)
-          }
+          case (ab +: abs) :: tail =>
+            ab match {
+              case Right(b) =>
+                buf += b
+                go(tail)
+              case Left(a) => go(f(a) :: abs :: tail)
+            }
         }
       go(f(a) :: Nil)
       buf.result

@@ -18,6 +18,6 @@ trait MonoidKLaws[F[_]] {
 
 object MonoidKLaws {
   def apply[F[_]](implicit instance: MonoidK[F]): MonoidKLaws[F] = new MonoidKLaws[F] {
-    override implicit val F: MonoidK[F] = instance
+    implicit override val F: MonoidK[F] = instance
   }
 }

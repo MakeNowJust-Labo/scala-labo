@@ -11,6 +11,6 @@ object ListInstancesProps extends Scalaprops {
     ApplicativeProps[List].applicative[Int, Int, Int],
     MonadProps[List].monad[Int, Int, Int],
     MonoidKProps[List].monoidK[Int],
-    AlternativeProps[List].alternative[Int, Int],
+    AlternativeProps[List].alternative[Int, Int]
   )
 }

@@ -13,18 +13,20 @@ object ReaderTProps extends Scalaprops {
     Properties.list(
       FunctorProps[Reader[MinInt, ?]].functor[MinInt, MinInt, MinInt],
       ApplicativeProps[Reader[MinInt, ?]].applicative[MinInt, MinInt, MinInt],
-      MonadProps[Reader[MinInt, ?]].monad[MinInt, MinInt, MinInt],
+      MonadProps[Reader[MinInt, ?]].monad[MinInt, MinInt, MinInt]
     )
   }
 
   val `laws (ReaderT)` = {
-    implicit def ReaderTGen[E, A](implicit gea: Gen[E => List[A]]): Gen[ReaderT[E, List, A]] = Gen[E => List[A]].map(ReaderT(_))
-    implicit def ReaderTEq[E, A](implicit eea: Eq[E => List[A]]): Eq[ReaderT[E, List, A]] = Eq[E => List[A]].contramap(_.run)
+    implicit def ReaderTGen[E, A](implicit gea: Gen[E => List[A]]): Gen[ReaderT[E, List, A]] =
+      Gen[E => List[A]].map(ReaderT(_))
+    implicit def ReaderTEq[E, A](implicit eea: Eq[E => List[A]]): Eq[ReaderT[E, List, A]] =
+      Eq[E => List[A]].contramap(_.run)
 
     Properties.list(
       FunctorProps[ReaderT[MinInt, List, ?]].functor[MinInt, MinInt, MinInt],
       ApplicativeProps[ReaderT[MinInt, List, ?]].applicative[MinInt, MinInt, MinInt],
-      MonadProps[ReaderT[Boolean, List, ?]].monad[MinInt, MinInt, MinInt],
+      MonadProps[ReaderT[Boolean, List, ?]].monad[MinInt, MinInt, MinInt]
     )
   }
 }

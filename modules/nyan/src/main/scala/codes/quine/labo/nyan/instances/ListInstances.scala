@@ -10,9 +10,9 @@ trait ListInstances {
     @tailrec
     def eqv(x: List[A], y: List[A]): Boolean =
       (x, y) match {
-        case (Nil, Nil) => true
+        case (Nil, Nil)                    => true
         case (a :: xs, b :: ys) if a === b => eqv(xs, ys)
-        case _ => false
+        case _                             => false
       }
   }
 
@@ -27,15 +27,16 @@ trait ListInstances {
       @tailrec
       def go(stack: List[List[Either[A, B]]]): Unit =
         stack match {
-          case Nil => ()
+          case Nil         => ()
           case Nil :: tail => go(tail)
-          case (ab :: abs) :: tail => ab match {
-            case Right(b) =>
-              buf += b
-              go(abs :: tail)
-            case Left(a) =>
-              go(f(a) :: abs :: tail)
-          }
+          case (ab :: abs) :: tail =>
+            ab match {
+              case Right(b) =>
+                buf += b
+                go(abs :: tail)
+              case Left(a) =>
+                go(f(a) :: abs :: tail)
+            }
         }
       go(f(a) :: Nil)
       buf.result

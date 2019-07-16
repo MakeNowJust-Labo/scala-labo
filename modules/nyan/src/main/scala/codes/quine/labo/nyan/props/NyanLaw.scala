@@ -10,14 +10,13 @@ final class NyanLaw private (val ord: Int, val fullName: String, val simpleName:
 object NyanLaw {
   private[this] val set: mutable.Set[NyanLaw] = mutable.Set.empty
 
-  private[this] def law(fullName: String, simpleName: String = ""): NyanLaw = {
+  private[this] def law(fullName: String, simpleName: String = ""): NyanLaw =
     set.synchronized {
       val ord = set.size
       val l = new NyanLaw(ord, fullName, if (simpleName.isEmpty) fullName else simpleName)
       set += l
       l
     }
-  }
 
   private[this] def law0(clazz: NyanLaw, simpleName: String): NyanLaw =
     law(s"${clazz.simpleName} $simpleName", simpleName)

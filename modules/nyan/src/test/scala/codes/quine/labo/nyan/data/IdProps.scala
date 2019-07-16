@@ -11,6 +11,6 @@ object IdProps extends Scalaprops {
   val laws = Properties.list(
     FunctorProps[Id].functor[MinInt, MinInt, MinInt],
     ApplicativeProps[Id].applicative[MinInt, MinInt, MinInt],
-    MonadProps[Id].monad[MinInt, MinInt, MinInt],
+    MonadProps[Id].monad[MinInt, MinInt, MinInt]
   )
 }

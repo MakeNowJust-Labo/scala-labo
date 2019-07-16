@@ -1,5 +1,3 @@
 package codes.quine.labo
 
-package object nyan {
-
-}
+package object nyan {}

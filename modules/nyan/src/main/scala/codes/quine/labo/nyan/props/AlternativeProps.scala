@@ -26,7 +26,7 @@ trait AlternativeProps[F[_]] extends ApplicativeProps[F] with MonoidKProps[F] {
     Properties.properties(NyanLaw.alternative)(
       NyanLaw.alternativeRightAbsorption -> alternativeRightAbsorption[A, B],
       NyanLaw.alternativeLeftDistributivity -> alternativeLeftDistributivity[A, B],
-      NyanLaw.alternativeRightDistributivity -> alternativeRightDistributivity[A, B],
+      NyanLaw.alternativeRightDistributivity -> alternativeRightDistributivity[A, B]
     )
 }
 

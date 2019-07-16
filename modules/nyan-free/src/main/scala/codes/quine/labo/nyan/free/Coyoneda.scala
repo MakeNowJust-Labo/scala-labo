@@ -8,7 +8,6 @@ trait Coyoneda[F[_], A] { self =>
   def fi: F[I]
   def k: I => A
 
-
   def mapK[G[_]](t: F ~> G): Coyoneda[G, A] = new Coyoneda[G, A] {
     type I = self.I
     def fi: G[I] = t(self.fi)
@@ -29,7 +28,7 @@ object Coyoneda {
     def map[A, B](fa: Coyoneda[F, A])(f: A => B): Coyoneda[F, B] = new Coyoneda[F, B] {
       type I = fa.I
       def fi: F[I] = fa.fi
-      def k: I => B = fa.k andThen f
+      def k: I => B = fa.k.andThen(f)
     }
   }
 }

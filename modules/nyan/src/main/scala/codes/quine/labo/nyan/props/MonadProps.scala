@@ -36,7 +36,7 @@ trait MonadProps[F[_]] extends ApplicativeProps[F] {
       NyanLaw.monadLeftIdentity -> monadLeftIdentity[A, B],
       NyanLaw.monadRightIdentity -> monadRightIdentity[A],
       NyanLaw.monadAssociativity -> monadAssociativity[A, B, C],
-      NyanLaw.monadTailRecMStackSafety -> tailRecMStackSafety,
+      NyanLaw.monadTailRecMStackSafety -> tailRecMStackSafety
     )
 }
 

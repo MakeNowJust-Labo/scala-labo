@@ -18,6 +18,7 @@ lazy val root = project.in(file("."))
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   )
   .dependsOn(nyan, free)
+  .aggregate(nyan, free)
 
 lazy val nyan = project.in(file("modules/nyan"))
   .settings(

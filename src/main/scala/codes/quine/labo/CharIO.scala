@@ -17,7 +17,9 @@ object CharIO {
 
   def readString: Program[String] =
     Program.tailRecM("") { s =>
-      read.map { c => if (c == '\u0000' || c == '\n') Right(s) else Left(s + c) }
+      read.map { c =>
+        if (c == '\u0000' || c == '\n') Right(s) else Left(s + c)
+      }
     }
 
   def writeString(s: String): Program[Unit] =
@@ -27,18 +29,20 @@ object CharIO {
 
   def run[A](p: Program[A])(input: String): ((String, String), A) =
     p.interpret(new (CharIO ~> State[(String, String), ?]) {
-      def apply[B](fb: CharIO[B]): State[(String, String), B] =
-        fb match {
-          case CharRead =>
-            for {
-              (i, o) <- State.read[(String, String)]
-              _ <- State.write((i.tail, o))
-            } yield i.headOption.getOrElse('\u0000')
-          case CharWrite(c) =>
-            for {
-              (i, o) <- State.read[(String, String)]
-              _ <- State.write((i, o + c))
-            } yield ()
-        }
-    }).run((input, "")).run
+        def apply[B](fb: CharIO[B]): State[(String, String), B] =
+          fb match {
+            case CharRead =>
+              for {
+                (i, o) <- State.read[(String, String)]
+                _ <- State.write((i.tail, o))
+              } yield i.headOption.getOrElse('\u0000')
+            case CharWrite(c) =>
+              for {
+                (i, o) <- State.read[(String, String)]
+                _ <- State.write((i, o + c))
+              } yield ()
+          }
+      })
+      .run((input, ""))
+      .run
 }

@@ -26,6 +26,6 @@ trait ApplicativeLaws[F[_]] extends FunctorLaws[F] {
 
 object ApplicativeLaws {
   def apply[F[_]](implicit instance: Applicative[F]): ApplicativeLaws[F] = new ApplicativeLaws[F] {
-    override implicit val F: Applicative[F] = instance
+    implicit override val F: Applicative[F] = instance
   }
 }

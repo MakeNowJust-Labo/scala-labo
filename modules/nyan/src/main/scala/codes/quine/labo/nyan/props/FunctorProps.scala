@@ -23,7 +23,7 @@ trait FunctorProps[F[_]] {
                        efc: Eq[F[C]]): Properties[NyanLaw] =
     Properties.properties(NyanLaw.functor)(
       NyanLaw.functorIdentity -> functorIdentity,
-      NyanLaw.functorComposition -> functorComposition,
+      NyanLaw.functorComposition -> functorComposition
     )
 }
 

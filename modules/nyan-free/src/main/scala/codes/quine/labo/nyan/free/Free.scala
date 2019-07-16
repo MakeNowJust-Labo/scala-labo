@@ -14,13 +14,13 @@ object Free {
 
   def foldFree[F[_], A, M[_]](fa: Free[F, A])(t: F ~> M)(implicit M: Monad[M]): M[A] =
     M.tailRecM(fa) {
-      case Pure(a) => M.pure(Right(a))
+      case Pure(a)      => M.pure(Right(a))
       case Flatten(ffa) => t(ffa).map(Left(_))
     }
 
   def iterate[F[_], A](fa: Free[F, A])(f: F[A] => A)(implicit F: Functor[F]): A =
     fa match {
-      case Pure(a) => a
+      case Pure(a)      => a
       case Flatten(ffa) => f(F.map(ffa)((fa: Free[F, A]) => iterate(fa)(f)))
     }
 
@@ -29,7 +29,7 @@ object Free {
 
     def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] =
       fa match {
-        case Pure(a) => f(a)
+        case Pure(a)      => f(a)
         case Flatten(ffa) => Flatten(F.map(ffa)((fa: Free[F, A]) => flatMap(fa)(f)))
       }
   }

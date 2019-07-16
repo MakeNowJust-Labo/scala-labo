@@ -6,7 +6,7 @@ import data._, syntax._
 case class Operational[F[_], A](free: Free[Coyoneda[F, ?], A]) {
   def interpret[M[_]](t: F ~> M)(implicit M: Monad[M]): M[A] =
     M.tailRecM(free) {
-      case Pure(a) => M.pure(Right(a))
+      case Pure(a)      => M.pure(Right(a))
       case Flatten(ffa) => ffa.mapK(t).run.map(Left(_))
     }
 }

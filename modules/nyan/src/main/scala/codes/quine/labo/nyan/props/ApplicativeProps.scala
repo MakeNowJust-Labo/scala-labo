@@ -36,13 +36,15 @@ trait ApplicativeProps[F[_]] extends FunctorProps[F] {
                            efa: Eq[F[A]],
                            efb: Eq[F[B]],
                            efc: Eq[F[C]]): Properties[NyanLaw] =
-    Properties.properties(NyanLaw.applicative)(
-      NyanLaw.applicativeIdentity -> applicativeIdentity[A],
-      NyanLaw.applicativeHomomorphism -> applicativeHomomorphism[A, B],
-      NyanLaw.applicativeInterchange -> applicativeInterchange[A, B],
-      NyanLaw.applicativeComposition -> applicativeComposition[A, B, C],
-      NyanLaw.applicativeMap -> applicativeMap[A, B],
-    ).andThenParam(Param.maxSize(20))
+    Properties
+      .properties(NyanLaw.applicative)(
+        NyanLaw.applicativeIdentity -> applicativeIdentity[A],
+        NyanLaw.applicativeHomomorphism -> applicativeHomomorphism[A, B],
+        NyanLaw.applicativeInterchange -> applicativeInterchange[A, B],
+        NyanLaw.applicativeComposition -> applicativeComposition[A, B, C],
+        NyanLaw.applicativeMap -> applicativeMap[A, B]
+      )
+      .andThenParam(Param.maxSize(20))
 }
 
 object ApplicativeProps {

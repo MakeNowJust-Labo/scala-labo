@@ -23,7 +23,7 @@ trait MonoidKProps[F[_]] {
     Properties.properties(NyanLaw.monoidK)(
       NyanLaw.monoidKLeftIdentity -> monoidKLeftIdentity,
       NyanLaw.monoidKRightIdentity -> monoidKRightIdentity,
-      NyanLaw.monoidKAssociativity -> monoidKAssociativity,
+      NyanLaw.monoidKAssociativity -> monoidKAssociativity
     )
 
   def props[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Properties[Unit :-: NyanLaw :-: Or.Empty] =

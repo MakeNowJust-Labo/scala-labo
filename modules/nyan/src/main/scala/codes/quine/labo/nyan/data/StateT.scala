@@ -24,7 +24,7 @@ object StateT {
                   case (s2, Left(a2)) => Left((s2, a2))
                   case (s2, Right(b)) => Right((s2, b))
                 }
-          }
+            }
         )
     }
 }
