@@ -30,3 +30,9 @@ trait EqProps[A] {
       NyanLaw.eqTransivity -> eqTransivity
     )
 }
+
+object EqProps {
+  def apply[A](implicit instance: Eq[A]): EqProps[A] = new EqProps[A] {
+    override implicit lazy val laws = EqLaws[A](instance)
+  }
+}

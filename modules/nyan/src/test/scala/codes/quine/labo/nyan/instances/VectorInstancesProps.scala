@@ -7,10 +7,11 @@ import scalaprops._
 
 object VectorInstancesProps extends Scalaprops {
   val laws = Properties.list(
-    FunctorProps[List].functor[Int, Int, Int],
-    ApplicativeProps[List].applicative[Int, Int, Int],
-    MonadProps[List].monad[Int, Int, Int],
-    MonoidKProps[List].monoidK[Int],
-    AlternativeProps[List].alternative[Int, Int]
+    EqProps[Vector[Int]].eq,
+    FunctorProps[Vector].functor[Int, Int, Int],
+    ApplicativeProps[Vector].applicative[Int, Int, Int],
+    MonadProps[Vector].monad[Int, Int, Int],
+    MonoidKProps[Vector].monoidK[Int],
+    AlternativeProps[Vector].alternative[Int, Int]
   )
 }
