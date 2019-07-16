@@ -6,6 +6,7 @@ object syntax
     with Arrow.ToArrowOps
     with Category.ToCategoryOps
     with Comonad.ToComonadOps
+    with Contravariant.ToContravariantOps
     with Eq.ToEqOps
     with Functor.ToFunctorOps
     with Monad.ToMonadOps

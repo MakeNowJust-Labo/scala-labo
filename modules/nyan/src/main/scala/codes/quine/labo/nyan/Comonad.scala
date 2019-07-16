@@ -9,5 +9,6 @@ import simulacrum.typeclass
 
   def coflatten[A](fa: F[A]): F[F[A]] = coflatMap(fa)(fa => fa)
 
+  @simulacrum.noop
   override def map[A, B](fa: F[A])(f: A => B): F[B] = coflatMap(fa)(fa => f(extract(fa)))
 }

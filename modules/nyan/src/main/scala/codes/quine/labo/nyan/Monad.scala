@@ -12,9 +12,11 @@ import simulacrum.typeclass
 
   def flatten[A](ffa: F[F[A]]): F[A] = flatMap(ffa)(identity)
 
+  @simulacrum.noop
   override def map[A, B](fa: F[A])(f: A => B): F[B] =
     flatMap(fa)(a => pure(f(a)))
 
+  @simulacrum.noop
   override def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] =
     flatMap(ff)(f => flatMap(fa)(a => pure(f(a))))
 }

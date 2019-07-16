@@ -43,6 +43,19 @@ trait ListInstances {
 
     override def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
 
+    override def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] = {
+      val buf = List.newBuilder[B]
+      @tailrec
+      def go(funs: List[A => B]): Unit = funs match {
+        case f :: fs =>
+          buf ++= fa.map(f)
+          go(fs)
+        case Nil => ()
+      }
+      go(ff)
+      buf.result
+    }
+
     def empty[A]: List[A] = List.empty
 
     def combine[A](x: List[A], y: List[A]): List[A] = x ++ y

@@ -48,4 +48,8 @@ object NyanLaw {
   val alternativeRightAbsorption: NyanLaw = law0(alternative, "right absorption")
   val alternativeLeftDistributivity: NyanLaw = law0(alternative, "left distributivity")
   val alternativeRightDistributivity: NyanLaw = law0(alternative, "right distributivity")
+
+  val contravariant: NyanLaw = law("contravariant")
+  val contravariantIdentity: NyanLaw = law0(contravariant, "identity")
+  val contravariantComposition: NyanLaw = law0(contravariant, "composition")
 }
