@@ -21,6 +21,12 @@ object NyanLaw {
   private[this] def law0(clazz: NyanLaw, simpleName: String): NyanLaw =
     law(s"${clazz.simpleName} $simpleName", simpleName)
 
+  val eq: NyanLaw = law("eq")
+  val eqReflexivity: NyanLaw = law0(eq, "reflexivity")
+  val eqSymmetry: NyanLaw = law0(eq, "symmetry")
+  val eqAntiSymmetry: NyanLaw = law0(eq, "anti symmetry")
+  val eqTransivity: NyanLaw = law0(eq, "transivity")
+
   val functor: NyanLaw = law("functor")
   val functorIdentity: NyanLaw = law0(functor, "identity")
   val functorComposition: NyanLaw = law0(functor, "composition")
