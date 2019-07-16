@@ -8,6 +8,5 @@ import simulacrum.typeclass
   @simulacrum.op("<*>", alias = true)
   def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
 
-  @simulacrum.noop
   override def map[A, B](fa: F[A])(f: A => B): F[B] = ap(pure(f))(fa)
 }
