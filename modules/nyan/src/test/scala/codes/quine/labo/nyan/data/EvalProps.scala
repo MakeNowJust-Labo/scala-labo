@@ -14,6 +14,6 @@ object EvalProps extends Scalaprops {
       EqProps[Eval[Int]].eq,
       FunctorProps[Eval].functor[MinInt, MinInt, MinInt],
       ApplicativeProps[Eval].applicative[MinInt, MinInt, MinInt],
-      MonadProps[Eval].monad[MinInt, MinInt, MinInt],
+      MonadProps[Eval].monad[MinInt, MinInt, MinInt]
     )
 }

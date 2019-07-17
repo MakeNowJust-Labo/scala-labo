@@ -33,6 +33,6 @@ trait EqProps[A] {
 
 object EqProps {
   def apply[A](implicit instance: Eq[A]): EqProps[A] = new EqProps[A] {
-    override implicit lazy val laws = EqLaws[A](instance)
+    implicit override lazy val laws = EqLaws[A](instance)
   }
 }

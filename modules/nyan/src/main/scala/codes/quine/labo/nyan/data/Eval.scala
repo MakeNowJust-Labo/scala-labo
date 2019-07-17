@@ -50,17 +50,17 @@ object Eval {
 
   def defer[A](fa: => Eval[A]): Eval[A] = new Defer(fa _) {}
 
-  private final case class Now[A](value: A) extends Eval[A] { self =>
+  final private case class Now[A](value: A) extends Eval[A] { self =>
     def memoize: Eval[A] = self
   }
 
-  private final class Always[A](f: () => A) extends Eval[A] {
+  final private class Always[A](f: () => A) extends Eval[A] {
     def value: A = f()
 
     def memoize: Eval[A] = new Later(f)
   }
 
-  private final class Later[A](f: () => A) extends Eval[A] { self =>
+  final private class Later[A](f: () => A) extends Eval[A] { self =>
     private[this] var thunk: () => A = f
 
     lazy val value: A = {
@@ -72,12 +72,12 @@ object Eval {
     def memoize: Eval[A] = self
   }
 
-  private abstract class Defer[A](val thunk: () => Eval[A]) extends Eval[A] { self =>
+  abstract private class Defer[A](val thunk: () => Eval[A]) extends Eval[A] { self =>
     def memoize: Eval[A] = Memoize(self)
     def value: A = evaluate(self)
   }
 
-  private abstract class FlatMap[A] extends Eval[A] { self =>
+  abstract private class FlatMap[A] extends Eval[A] { self =>
     type S
     val start: () => Eval[S]
     val run: S => Eval[A]
@@ -128,7 +128,7 @@ object Eval {
       curr match {
         case c: FlatMap[_] =>
           c.start() match {
-            case cc: FlatMap[_] => 
+            case cc: FlatMap[_] =>
               loop(cc.start(), cc.run.asInstanceOf[C] :: c.run.asInstanceOf[C] :: fs)
             case mm @ Memoize(eval) =>
               mm.result match {
@@ -139,23 +139,23 @@ object Eval {
               }
             case xx => loop(c.run(xx.value), fs)
           }
-          case call: Defer[_] =>
-            loop(advance(call), fs)
-          case m @ Memoize(eval) =>
-            m.result match {
-              case Some(a) =>
-                fs match {
-                  case f :: fs => loop(f(a), fs)
-                  case Nil => a
-                }
-              case None => 
-                loop(eval, addToMemo(m) :: fs)
-            }
-          case x =>
-            fs match {
-              case f :: fs => loop(f(x.value), fs)
-              case Nil => x.value
-            }
+        case call: Defer[_] =>
+          loop(advance(call), fs)
+        case m @ Memoize(eval) =>
+          m.result match {
+            case Some(a) =>
+              fs match {
+                case f :: fs => loop(f(a), fs)
+                case Nil     => a
+              }
+            case None =>
+              loop(eval, addToMemo(m) :: fs)
+          }
+        case x =>
+          fs match {
+            case f :: fs => loop(f(x.value), fs)
+            case Nil     => x.value
+          }
       }
 
     loop(eval.asInstanceOf[L], Nil).asInstanceOf[A]
