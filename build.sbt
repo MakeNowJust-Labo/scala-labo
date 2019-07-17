@@ -9,6 +9,10 @@ ThisBuild / scalacOptions ++= Seq(
   "-Xlint",
   "-Ymacro-annotations",
 )
+for {
+  project <- Seq(root, nyan, free)
+  scope <- Seq(Compile, Test)
+} yield project / scope / console / scalacOptions += "-Ywarn-unused:-imports,_"
 ThisBuild / resolvers += Resolver.sonatypeRepo("releases")
 
 lazy val root = project.in(file("."))
