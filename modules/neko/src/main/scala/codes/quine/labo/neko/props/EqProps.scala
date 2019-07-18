@@ -7,8 +7,7 @@ import scalaprops._
 
 trait EqProps[A] {
   val laws: EqLaws[A]
-
-  implicit val EA: Eq[A] = laws.EA
+  import laws._ // to use Eq[A] instance
 
   def eqReflectivity(implicit ga: Gen[A]): Property =
     Property.forAll(laws.eqReflexivity(_: A))
@@ -33,6 +32,6 @@ trait EqProps[A] {
 
 object EqProps {
   def apply[A](implicit instance: Eq[A]): EqProps[A] = new EqProps[A] {
-    implicit override lazy val laws = EqLaws[A](instance)
+    val laws = EqLaws[A]
   }
 }

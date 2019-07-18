@@ -18,6 +18,6 @@ trait AlternativeLaws[F[_]] extends ApplicativeLaws[F] with MonoidKLaws[F] {
 
 object AlternativeLaws {
   def apply[F[_]](implicit instance: Alternative[F]): AlternativeLaws[F] = new AlternativeLaws[F] {
-    implicit override val F: Alternative[F] = instance
+    val F: Alternative[F] = instance
   }
 }

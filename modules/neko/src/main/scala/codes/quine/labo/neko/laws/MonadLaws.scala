@@ -24,6 +24,6 @@ trait MonadLaws[F[_]] extends ApplicativeLaws[F] {
 
 object MonadLaws {
   def apply[F[_]](implicit instance: Monad[F]): MonadLaws[F] = new MonadLaws[F] {
-    implicit override val F: Monad[F] = instance
+    val F: Monad[F] = instance
   }
 }

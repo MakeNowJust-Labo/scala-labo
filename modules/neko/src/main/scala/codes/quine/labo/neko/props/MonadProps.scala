@@ -8,8 +8,6 @@ import scalaprops._
 trait MonadProps[F[_]] extends ApplicativeProps[F] {
   val laws: MonadLaws[F]
 
-  implicit override val F: Monad[F] = laws.F
-
   def monadLeftIdentity[A, B](implicit ga: Gen[A], gf: Gen[A => F[B]], efb: Eq[F[B]]): Property =
     Property.forAll(laws.monadLeftIdentity(_: A, _: A => F[B]))
 
@@ -42,6 +40,6 @@ trait MonadProps[F[_]] extends ApplicativeProps[F] {
 
 object MonadProps {
   def apply[F[_]](implicit instance: Monad[F]): MonadProps[F] = new MonadProps[F] {
-    override lazy val laws: MonadLaws[F] = MonadLaws[F](instance)
+    val laws: MonadLaws[F] = MonadLaws[F](instance)
   }
 }

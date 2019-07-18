@@ -8,8 +8,6 @@ import scalaprops._
 trait MonoidKProps[F[_]] {
   val laws: MonoidKLaws[F]
 
-  implicit val F: MonoidK[F] = laws.F
-
   def monoidKLeftIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.monoidKLeftIdentity(_: F[A]))
 
@@ -29,6 +27,6 @@ trait MonoidKProps[F[_]] {
 
 object MonoidKProps {
   def apply[F[_]](implicit instance: MonoidK[F]): MonoidKProps[F] = new MonoidKProps[F] {
-    override lazy val laws: MonoidKLaws[F] = MonoidKLaws[F](instance)
+    val laws: MonoidKLaws[F] = MonoidKLaws[F](instance)
   }
 }

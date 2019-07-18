@@ -8,8 +8,6 @@ import scalaprops._
 trait ContravariantProps[F[_]] {
   val laws: ContravariantLaws[F]
 
-  implicit def F: Contravariant[F] = laws.F
-
   def contravariantIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.contravariantIdentity(_: F[A]))
 
@@ -31,6 +29,6 @@ trait ContravariantProps[F[_]] {
 
 object ContravariantProps {
   def apply[F[_]](implicit instance: Contravariant[F]): ContravariantProps[F] = new ContravariantProps[F] {
-    override lazy val laws: ContravariantLaws[F] = ContravariantLaws[F](instance)
+    val laws: ContravariantLaws[F] = ContravariantLaws[F](instance)
   }
 }

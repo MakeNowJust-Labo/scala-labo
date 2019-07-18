@@ -8,8 +8,6 @@ import scalaprops._
 trait ApplicativeProps[F[_]] extends FunctorProps[F] {
   val laws: ApplicativeLaws[F]
 
-  implicit override val F: Applicative[F] = laws.F
-
   def applicativeIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.applicativeIdentity(_: F[A]))
 
@@ -49,6 +47,6 @@ trait ApplicativeProps[F[_]] extends FunctorProps[F] {
 
 object ApplicativeProps {
   def apply[F[_]](implicit instance: Applicative[F]): ApplicativeProps[F] = new ApplicativeProps[F] {
-    override lazy val laws: ApplicativeLaws[F] = ApplicativeLaws[F](instance)
+    val laws: ApplicativeLaws[F] = ApplicativeLaws[F](instance)
   }
 }

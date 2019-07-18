@@ -21,6 +21,6 @@ trait EqLaws[A] {
 
 object EqLaws {
   def apply[A](implicit instance: Eq[A]): EqLaws[A] = new EqLaws[A] {
-    implicit val EA: Eq[A] = instance
+    val EA: Eq[A] = instance
   }
 }
