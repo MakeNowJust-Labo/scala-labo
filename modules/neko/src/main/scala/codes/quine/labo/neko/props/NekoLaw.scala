@@ -28,6 +28,11 @@ object NekoLaw {
   val eqAntiSymmetry: NekoLaw = law0(eq, "anti symmetry")
   val eqTransivity: NekoLaw = law0(eq, "transivity")
 
+  val defer: NekoLaw = law("defer")
+  val deferIdentity: NekoLaw = law0(defer, "identity")
+  val deferDoesNotEvaluate: NekoLaw = law0(defer, "does not evaluate")
+  val deferStackSafety: NekoLaw = law0(defer, "stack safety")
+
   val functor: NekoLaw = law("functor")
   val functorIdentity: NekoLaw = law0(functor, "identity")
   val functorComposition: NekoLaw = law0(functor, "composition")

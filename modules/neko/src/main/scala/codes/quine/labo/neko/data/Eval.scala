@@ -104,19 +104,12 @@ object Eval {
 
   final private case class Memoize[A](var fa: Eval[A]) extends Eval[A] {
     var memo: Option[A] = None
-    def value: A = memo match {
-      case Some(a) => a
-      case None =>
-        val a = evaluate(this)
-        fa = null
-        memo = Some(a)
-        a
-    }
+    def value: A = evaluate(this)
     def memoize: Eval[A] = this
   }
 
-  final private case class Defer[A](fa: () => Eval[A]) extends Eval[A] {
-    val value: A = evaluate(this)
+  final private case class Defer[A](thunk: () => Eval[A]) extends Eval[A] {
+    def value: A = evaluate(this)
     def memoize: Eval[A] = Memoize(this)
   }
 
@@ -136,7 +129,7 @@ object Eval {
     @tailrec def loop[A1, B1](fa: Eval[A1], f: AndThen[A1, B1]): B1 =
       fa match {
         case FlatMap(fa1, f1) => loop(fa1, f1 ++ f)
-        case Defer(fa1)       => loop(fa1(), f)
+        case Defer(t)       => loop(t(), f)
         case m: Memoize[A1] =>
           m.memo match {
             case Some(a) =>
@@ -163,6 +156,6 @@ object Eval {
     def flatMap[A, B](fa: Eval[A])(f: A => Eval[B]): Eval[B] = fa.flatMap(f)
     override def map[A, B](fa: Eval[A])(f: A => B): Eval[B] = fa.map(f)
 
-    def defer[A](fa: => Eval[A]): Eval[A] = Defer(fa _)
+    def defer[A](fa: => Eval[A]): Eval[A] = Defer(() => fa)
   }
 }
