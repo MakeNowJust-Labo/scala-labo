@@ -157,9 +157,11 @@ object Eval {
 
   implicit def EvalEqInstances[A: Eq]: Eq[Eval[A]] = Eq[A].by(_.value)
 
-  implicit object EvalInstances extends Monad[Eval] {
+  implicit object EvalInstances extends Monad[Eval] with neko.Defer[Eval] {
     def pure[A](a: A): Eval[A] = Now(a)
     def flatMap[A, B](fa: Eval[A])(f: A => Eval[B]): Eval[B] = fa.flatMap(f)
     override def map[A, B](fa: Eval[A])(f: A => B): Eval[B] = fa.map(f)
+
+    def defer[A](fa: => Eval[A]): Eval[A] = Defer(fa _)
   }
 }
