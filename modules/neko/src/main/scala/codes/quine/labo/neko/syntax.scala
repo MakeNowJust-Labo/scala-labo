@@ -7,6 +7,7 @@ object syntax
     with Category.ToCategoryOps
     with Comonad.ToComonadOps
     with Contravariant.ToContravariantOps
+    with Defer.ToDeferOps
     with Eq.ToEqOps
     with Functor.ToFunctorOps
     with Monad.ToMonadOps
