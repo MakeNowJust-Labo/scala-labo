@@ -10,7 +10,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-Ymacro-annotations",
 )
 for {
-  project <- Seq(root, nyan, free)
+  project <- Seq(root, neko, free)
   scope <- Seq(Compile, Test)
 } yield project / scope / console / scalacOptions += "-Ywarn-unused:-imports,_"
 ThisBuild / resolvers += Resolver.sonatypeRepo("releases")
@@ -21,12 +21,12 @@ lazy val root = project.in(file("."))
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0"),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   )
-  .dependsOn(nyan, free)
-  .aggregate(nyan, free)
+  .dependsOn(neko, free)
+  .aggregate(neko, free)
 
-lazy val nyan = project.in(file("modules/nyan"))
+lazy val neko = project.in(file("modules/neko"))
   .settings(
-    name := "nyan",
+    name := "neko",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.0",
@@ -35,11 +35,11 @@ lazy val nyan = project.in(file("modules/nyan"))
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   )
 
-lazy val free = project.in(file("modules/nyan-free"))
+lazy val free = project.in(file("modules/neko-free"))
   .settings(
-    name := "nyan-free",
+    name := "neko-free",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   )
-  .dependsOn(nyan)
+  .dependsOn(neko)

@@ -1,6 +1,6 @@
 package codes.quine.labo
 
-import nyan._, data._, free._, syntax._
+import neko._, data._, free._, syntax._
 
 sealed trait CharIO[A]
 
