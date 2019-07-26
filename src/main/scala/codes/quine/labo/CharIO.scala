@@ -1,6 +1,6 @@
 package codes.quine.labo
 
-import nyan._, category._, data._, free._, syntax._
+import nyan._, data._, free._, syntax._
 
 sealed trait CharIO[A]
 
@@ -44,5 +44,5 @@ object CharIO {
           }
       })
       .run((input, ""))
-      .run
+      .value
 }
