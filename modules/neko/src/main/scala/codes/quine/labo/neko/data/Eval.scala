@@ -33,7 +33,8 @@ object Eval {
    *
    * @see [[http://hackage.haskell.org/package/type-aligned]]
    */
-  private sealed trait FunTree[A, B] {
+  sealed private trait FunTree[A, B] {
+
     /** Append a function to the last. O(1) */
     def :+[C](f: B => Eval[C]): FunTree[A, C] = FunTree.append(this, f)
 
@@ -45,10 +46,13 @@ object Eval {
   }
 
   private object FunTree {
+
     /** An empty function composition (Eval.now: A => Eval[A]). */
     final case class Empty[A]() extends FunTree[A, A]
+
     /** A single A => Eval[B] function.  */
     final case class Leaf[A, B](f: A => Eval[B]) extends FunTree[A, B]
+
     /** A => Eval[B] and B => Eval[C] functions composition. */
     final case class Node[A, B, C](l: FunTree[A, B], r: FunTree[B, C]) extends FunTree[A, C]
 
@@ -59,14 +63,14 @@ object Eval {
       (l, r) match {
         case (_: Empty[A], _) => r
         case (_, _: Empty[B]) => l
-        case _                 => Node(l, r)
+        case _                => Node(l, r)
       }
 
     def append[A, B, C](l: FunTree[A, B], f: B => Eval[C]): FunTree[A, C] = concat(l, Leaf(f))
   }
 
   /** [[FunTree]] view. */
-  private sealed trait FunList[A, B]
+  sealed private trait FunList[A, B]
 
   private object FunList {
     import FunTree._
@@ -134,7 +138,7 @@ object Eval {
     @tailrec def loop[A1, B1](fa: Eval[A1], f: FunTree[A1, B1]): B1 =
       fa match {
         case FlatMap(fa1, f1) => loop(fa1, f1 ++ f)
-        case Defer(t)       => loop(t(), f)
+        case Defer(t)         => loop(t(), f)
         case m: Memoize[A1] =>
           m.memo match {
             case Some(a) =>
