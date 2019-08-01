@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package data
 
 final case class StateT[S, M[_], A](run: S => M[(S, A)])

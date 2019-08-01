@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -28,7 +29,7 @@ trait ContravariantProps[F[_]] {
 }
 
 object ContravariantProps {
-  def apply[F[_]](implicit instance: Contravariant[F]): ContravariantProps[F] = new ContravariantProps[F] {
-    val laws: ContravariantLaws[F] = ContravariantLaws[F](instance)
+  def apply[F[_]: Contravariant]: ContravariantProps[F] = new ContravariantProps[F] {
+    val laws: ContravariantLaws[F] = ContravariantLaws[F]
   }
 }

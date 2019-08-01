@@ -1,6 +1,7 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 
-object syntax
+trait AllSyntax
     extends Alternative.ToAlternativeOps
     with Applicative.ToApplicativeOps
     with Arrow.ToArrowOps
@@ -11,4 +12,11 @@ object syntax
     with Eq.ToEqOps
     with Functor.ToFunctorOps
     with Monad.ToMonadOps
+    with Monoid.ToMonoidOps
     with MonoidK.ToMonoidKOps
+    with Ord.ToOrdOps
+    with PartialOrd.ToPartialOrdOps
+    with Semigroup.ToSemigroupOps
+    with SemigroupK.ToSemigroupKOps
+
+object syntax extends AllSyntax

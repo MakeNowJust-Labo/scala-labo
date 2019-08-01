@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -39,7 +40,7 @@ trait MonadProps[F[_]] extends ApplicativeProps[F] {
 }
 
 object MonadProps {
-  def apply[F[_]](implicit instance: Monad[F]): MonadProps[F] = new MonadProps[F] {
-    val laws: MonadLaws[F] = MonadLaws[F](instance)
+  def apply[F[_]: Monad]: MonadProps[F] = new MonadProps[F] {
+    val laws: MonadLaws[F] = MonadLaws[F]
   }
 }

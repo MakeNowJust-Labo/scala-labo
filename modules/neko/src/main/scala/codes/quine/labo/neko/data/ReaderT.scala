@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package data
 
 import syntax._

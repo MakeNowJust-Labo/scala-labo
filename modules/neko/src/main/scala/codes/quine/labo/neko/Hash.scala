@@ -3,6 +3,6 @@ package neko
 
 import simulacrum.typeclass
 
-@typeclass trait Defer[F[_]] {
-  def defer[A](fa: => F[A]): F[A]
+@typeclass trait Hash[A] extends Eq[A] {
+  def hash(x: A): Int
 }

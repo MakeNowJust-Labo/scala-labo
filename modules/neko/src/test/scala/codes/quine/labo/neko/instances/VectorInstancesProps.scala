@@ -11,6 +11,7 @@ object VectorInstancesProps extends Scalaprops {
     FunctorProps[Vector].functor[Int, Int, Int],
     ApplicativeProps[Vector].applicative[Int, Int, Int],
     MonadProps[Vector].monad[Int, Int, Int],
+    SemigroupKProps[Vector].semigroupK[Int],
     MonoidKProps[Vector].monoidK[Int],
     AlternativeProps[Vector].alternative[Int, Int]
   )

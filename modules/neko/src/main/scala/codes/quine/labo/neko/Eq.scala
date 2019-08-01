@@ -1,4 +1,7 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
+
+import scala.math
 
 import simulacrum.typeclass
 
@@ -10,13 +13,7 @@ import simulacrum.typeclass
   def neqv(x: A, y: A): Boolean = !eqv(x, y)
 
   @simulacrum.noop
-  final def by[B](f: B => A): Eq[B] = Eq.eqv((x, y) => self.eqv(f(x), f(y)))
-
-  @simulacrum.noop
-  final def and(other: Eq[A]): Eq[A] = Eq.eqv((x, y) => self.eqv(x, y) && other.eqv(x, y))
-
-  @simulacrum.noop
-  final def or(other: Eq[A]): Eq[A] = Eq.eqv((x, y) => self.eqv(x, y) || other.eqv(x, y))
+  def by[B](f: B => A): Eq[B] = Eq.eqv((x, y) => self.eqv(f(x), f(y)))
 }
 
 object Eq {
@@ -24,9 +21,7 @@ object Eq {
     def eqv(x: A, y: A): Boolean = f(x, y)
   }
 
-  def default[A]: Eq[A] = new Eq[A] {
-    def eqv(x: A, y: A): Boolean = x == y
-
-    override def neqv(x: A, y: A): Boolean = x != y
+  def fromEquiv[A: math.Equiv]: Eq[A] = new Eq[A] {
+    def eqv(x: A, y: A): Boolean = math.Equiv[A].equiv(x, y)
   }
 }

@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package instances
 
 import scala.annotation.tailrec
@@ -43,8 +44,8 @@ trait VectorInstances {
 
     override def map[A, B](fa: Vector[A])(f: A => B): Vector[B] = fa.map(f)
 
-    def empty[A]: Vector[A] = Vector.empty[A]
+    def emptyK[A]: Vector[A] = Vector.empty[A]
 
-    def combine[A](x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+    def concatK[A](x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
   }
 }

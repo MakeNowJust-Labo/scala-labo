@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package instances
 
 import scala.annotation.tailrec
@@ -57,8 +58,8 @@ trait ListInstances {
       buf.result
     }
 
-    def empty[A]: List[A] = List.empty
+    def emptyK[A]: List[A] = List.empty
 
-    def combine[A](x: List[A], y: List[A]): List[A] = x ++ y
+    def concatK[A](x: List[A], y: List[A]): List[A] = x ++ y
   }
 }

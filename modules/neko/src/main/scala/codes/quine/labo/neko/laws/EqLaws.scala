@@ -1,10 +1,11 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package laws
 
 import syntax._
 
 trait EqLaws[A] {
-  implicit val EA: Eq[A]
+  implicit val A: Eq[A]
 
   def eqReflexivity(x: A): IsEq[A] =
     x <-> x
@@ -13,14 +14,14 @@ trait EqLaws[A] {
     (x === y) <-> (y === x)
 
   def eqAntiSymmetry(x: A, y: A, f: A => A): IsEq[Boolean] =
-    (x =!= y || f(x) === f(y)) <-> true
+    x === y ==> (f(x) === f(y))
 
   def eqTransivity(x: A, y: A, z: A): IsEq[Boolean] =
-    (!(x === y && y === z) || x === z) <-> true
+    (x === y && y === z) ==> (x === z)
 }
 
 object EqLaws {
   def apply[A](implicit instance: Eq[A]): EqLaws[A] = new EqLaws[A] {
-    val EA: Eq[A] = instance
+    val A: Eq[A] = instance
   }
 }

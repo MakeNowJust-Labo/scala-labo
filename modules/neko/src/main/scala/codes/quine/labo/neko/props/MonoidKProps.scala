@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -14,19 +15,15 @@ trait MonoidKProps[F[_]] {
   def monoidKRightIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.monoidKRightIdentity(_: F[A]))
 
-  def monoidKAssociativity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
-    Property.forAll(laws.monoidKAssociativity(_: F[A], _: F[A], _: F[A]))
-
   def monoidK[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.monoidK)(
       NekoLaw.monoidKLeftIdentity -> monoidKLeftIdentity,
-      NekoLaw.monoidKRightIdentity -> monoidKRightIdentity,
-      NekoLaw.monoidKAssociativity -> monoidKAssociativity
+      NekoLaw.monoidKRightIdentity -> monoidKRightIdentity
     )
 }
 
 object MonoidKProps {
-  def apply[F[_]](implicit instance: MonoidK[F]): MonoidKProps[F] = new MonoidKProps[F] {
-    val laws: MonoidKLaws[F] = MonoidKLaws[F](instance)
+  def apply[F[_]: MonoidK]: MonoidKProps[F] = new MonoidKProps[F] {
+    val laws: MonoidKLaws[F] = MonoidKLaws[F]
   }
 }

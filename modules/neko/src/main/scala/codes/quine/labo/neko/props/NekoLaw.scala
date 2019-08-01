@@ -28,6 +28,24 @@ object NekoLaw {
   val eqAntiSymmetry: NekoLaw = law0(eq, "anti symmetry")
   val eqTransivity: NekoLaw = law0(eq, "transivity")
 
+  val hash: NekoLaw = law("hash")
+  val hashCompatibility: NekoLaw = law0(hash, "compatibility")
+
+  val partialOrd: NekoLaw = law("partialOrd")
+  val partialOrdReflexivity: NekoLaw = law0(partialOrd, "reflexivity")
+  val partialOrdAntisymmetry: NekoLaw = law0(partialOrd, "anti symmetry")
+  val partialOrdTransivity: NekoLaw = law0(partialOrd, "transivity")
+
+  val ord: NekoLaw = law("ord")
+  val ordTotality: NekoLaw = law0(ord, "totality")
+
+  val semigroup: NekoLaw = law("semigroup")
+  val semigroupAssociativity: NekoLaw = law0(semigroup, "associativity")
+
+  val monoid: NekoLaw = law("monoid")
+  val monoidLeftIdentity: NekoLaw = law0(monoid, "left identity")
+  val monoidRightIdentity: NekoLaw = law0(monoid, "right identity")
+
   val defer: NekoLaw = law("defer")
   val deferIdentity: NekoLaw = law0(defer, "identity")
   val deferDoesNotEvaluate: NekoLaw = law0(defer, "does not evaluate")
@@ -50,10 +68,12 @@ object NekoLaw {
   val monadAssociativity: NekoLaw = law0(monad, "associativity")
   val monadTailRecMStackSafety: NekoLaw = law0(monad, "tailRecM stack safety")
 
+  val semigroupK: NekoLaw = law("semigroupK")
+  val semigroupKAssociativity: NekoLaw = law0(semigroupK, "associativity")
+
   val monoidK: NekoLaw = law("monoidK")
   val monoidKLeftIdentity: NekoLaw = law0(monoidK, "left identity")
   val monoidKRightIdentity: NekoLaw = law0(monoidK, "right identity")
-  val monoidKAssociativity: NekoLaw = law0(monoidK, "associativity")
 
   val alternative: NekoLaw = law("alternative")
   val alternativeRightAbsorption: NekoLaw = law0(alternative, "right absorption")

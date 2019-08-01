@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -29,7 +30,7 @@ trait AlternativeProps[F[_]] extends ApplicativeProps[F] with MonoidKProps[F] {
 }
 
 object AlternativeProps {
-  def apply[F[_]](implicit instance: Alternative[F]): AlternativeProps[F] = new AlternativeProps[F] {
-    val laws: AlternativeLaws[F] = AlternativeLaws[F](instance)
+  def apply[F[_]: Alternative]: AlternativeProps[F] = new AlternativeProps[F] {
+    val laws: AlternativeLaws[F] = AlternativeLaws[F]
   }
 }

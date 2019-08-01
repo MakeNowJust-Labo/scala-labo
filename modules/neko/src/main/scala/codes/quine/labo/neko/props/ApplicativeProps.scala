@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -46,7 +47,7 @@ trait ApplicativeProps[F[_]] extends FunctorProps[F] {
 }
 
 object ApplicativeProps {
-  def apply[F[_]](implicit instance: Applicative[F]): ApplicativeProps[F] = new ApplicativeProps[F] {
-    val laws: ApplicativeLaws[F] = ApplicativeLaws[F](instance)
+  def apply[F[_]: Applicative]: ApplicativeProps[F] = new ApplicativeProps[F] {
+    val laws: ApplicativeLaws[F] = ApplicativeLaws[F]
   }
 }

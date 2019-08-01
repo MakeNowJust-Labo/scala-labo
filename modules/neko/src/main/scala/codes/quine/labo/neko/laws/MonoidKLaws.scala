@@ -1,19 +1,17 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package laws
 
 import syntax._
 
-trait MonoidKLaws[F[_]] {
+trait MonoidKLaws[F[_]] extends SemigroupKLaws[F] {
   implicit val F: MonoidK[F]
 
   def monoidKLeftIdentity[A](fa: F[A]): IsEq[F[A]] =
-    fa <-> (F.empty[A] <+> fa)
+    fa <-> (F.emptyK[A] <+> fa)
 
   def monoidKRightIdentity[A](fa: F[A]): IsEq[F[A]] =
-    fa <-> (fa <+> F.empty[A])
-
-  def monoidKAssociativity[A](x: F[A], y: F[A], z: F[A]): IsEq[F[A]] =
-    ((x <+> y) <+> z) <-> (x <+> (y <+> z))
+    fa <-> (fa <+> F.emptyK[A])
 }
 
 object MonoidKLaws {

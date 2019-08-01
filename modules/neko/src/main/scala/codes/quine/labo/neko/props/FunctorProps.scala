@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._
@@ -26,7 +27,7 @@ trait FunctorProps[F[_]] {
 }
 
 object FunctorProps {
-  def apply[F[_]](implicit instance: Functor[F]): FunctorProps[F] = new FunctorProps[F] {
-    val laws: FunctorLaws[F] = FunctorLaws[F](instance)
+  def apply[F[_]: Functor]: FunctorProps[F] = new FunctorProps[F] {
+    val laws: FunctorLaws[F] = FunctorLaws[F]
   }
 }

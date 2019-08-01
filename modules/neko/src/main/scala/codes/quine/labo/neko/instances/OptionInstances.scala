@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package instances
 
 import scala.annotation.tailrec
@@ -19,8 +20,8 @@ trait OptionInstances {
 
     override def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
 
-    def empty[A]: Option[A] = None
+    def emptyK[A]: Option[A] = None
 
-    def combine[A](x: Option[A], y: Option[A]): Option[A] = x.orElse(y)
+    def concatK[A](x: Option[A], y: Option[A]): Option[A] = x.orElse(y)
   }
 }

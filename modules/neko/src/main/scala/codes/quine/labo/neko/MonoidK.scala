@@ -1,10 +1,8 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 
 import simulacrum.typeclass
 
-@typeclass trait MonoidK[F[_]] {
-  def empty[A]: F[A]
-
-  @simulacrum.op("<+>", alias = true)
-  def combine[A](x: F[A], y: F[A]): F[A]
+@typeclass trait MonoidK[F[_]] extends SemigroupK[F] {
+  def emptyK[A]: F[A]
 }

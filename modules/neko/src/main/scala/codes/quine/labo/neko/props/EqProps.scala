@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._, instances._
@@ -31,7 +32,7 @@ trait EqProps[A] {
 }
 
 object EqProps {
-  def apply[A](implicit instance: Eq[A]): EqProps[A] = new EqProps[A] {
+  def apply[A: Eq]: EqProps[A] = new EqProps[A] {
     val laws = EqLaws[A]
   }
 }

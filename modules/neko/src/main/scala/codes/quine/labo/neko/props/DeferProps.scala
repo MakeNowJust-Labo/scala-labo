@@ -1,4 +1,5 @@
-package codes.quine.labo.neko
+package codes.quine.labo
+package neko
 package props
 
 import laws._, instances._
@@ -26,7 +27,7 @@ trait DeferProps[F[_]] {
 }
 
 object DeferProps {
-  def apply[F[_]](implicit instance: Defer[F]): DeferProps[F] = new DeferProps[F] {
+  def apply[F[_]: Defer]: DeferProps[F] = new DeferProps[F] {
     val laws: DeferLaws[F] = DeferLaws[F]
   }
 }
