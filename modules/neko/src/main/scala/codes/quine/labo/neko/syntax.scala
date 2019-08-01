@@ -11,6 +11,7 @@ trait AllSyntax
     with Defer.ToDeferOps
     with Eq.ToEqOps
     with Functor.ToFunctorOps
+    with Hash.ToHashOps
     with Monad.ToMonadOps
     with Monoid.ToMonoidOps
     with MonoidK.ToMonoidKOps
