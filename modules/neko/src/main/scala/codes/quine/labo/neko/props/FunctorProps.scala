@@ -2,9 +2,8 @@ package codes.quine.labo
 package neko
 package props
 
-import laws._
-
 import scalaprops._
+import laws._
 
 trait FunctorProps[F[_]] {
   val laws: FunctorLaws[F]
@@ -15,15 +14,22 @@ trait FunctorProps[F[_]] {
   def functorComposition[A, B, C](implicit gfa: Gen[F[A]], gf: Gen[A => B], gg: Gen[B => C], efc: Eq[F[C]]): Property =
     Property.forAll(laws.functorComposition(_: F[A], _: A => B, _: B => C))
 
-  def functor[A, B, C](implicit gfa: Gen[F[A]],
-                       gf: Gen[A => B],
-                       gg: Gen[B => C],
-                       efa: Eq[F[A]],
-                       efc: Eq[F[C]]): Properties[NekoLaw] =
+  def props[A, B, C](implicit gfa: Gen[F[A]],
+                     gf: Gen[A => B],
+                     gg: Gen[B => C],
+                     efa: Eq[F[A]],
+                     efc: Eq[F[C]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.functor)(
       NekoLaw.functorIdentity -> functorIdentity,
       NekoLaw.functorComposition -> functorComposition
     )
+
+  def all[A, B, C](implicit gfa: Gen[F[A]],
+                   gf: Gen[A => B],
+                   gg: Gen[B => C],
+                   efa: Eq[F[A]],
+                   efc: Eq[F[C]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.functorAll, props[A, B, C])
 }
 
 object FunctorProps {

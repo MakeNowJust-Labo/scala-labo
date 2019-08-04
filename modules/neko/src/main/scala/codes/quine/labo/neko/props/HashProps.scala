@@ -3,19 +3,22 @@ package neko
 package props
 
 import scalaprops._
+import instances._, laws._
 
-import laws._, instances._
-
-trait HashProps[A] extends EqProps[A] {
+trait HashProps[A] {
   val laws: HashLaws[A]
+  import laws._
 
   def hashCompatibility(implicit ga: Gen[A]): Property =
     Property.forAll(laws.hashCompatibility(_: A, _: A))
 
-  def hash(implicit ga: Gen[A]): Properties[NekoLaw] =
+  def props(implicit ga: Gen[A]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.hash)(
       NekoLaw.hashCompatibility -> hashCompatibility
     )
+
+  def all(implicit ga: Gen[A], gf: Gen[A => A]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.hashAll, EqProps[A].all, props)
 }
 
 object HashProps {

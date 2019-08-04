@@ -11,14 +11,9 @@ object IdProps extends Scalaprops {
   implicit def idCogenInstance[A](implicit ca: Cogen[A]): Cogen[Id[A]] = Cogen[A].contramap(_.value)
 
   val laws = Properties.list(
-    EqProps[Id[Int]].eq,
-    PartialOrdProps[Id[Int]].partialOrd,
-    OrdProps[Id[Int]].ord,
-    HashProps[Id[Int]].hash,
-    SemigroupProps[Id[String]].semigroup,
-    MonoidProps[Id[String]].monoid,
-    FunctorProps[Id].functor[Int, Int, Int],
-    ApplicativeProps[Id].applicative[Int, Int, Int],
-    MonadProps[Id].monad[Int, Int, Int]
+    OrdProps[Id[Int]].all,
+    HashProps[Id[Int]].all,
+    MonoidProps[Id[String]].all,
+    MonadProps[Id].all[Int, Int, Int]
   )
 }

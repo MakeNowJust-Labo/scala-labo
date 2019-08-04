@@ -13,15 +13,10 @@ object EvalProps extends Scalaprops {
 
   val laws =
     Properties.list(
-      EqProps[Eval[Int]].eq,
-      PartialOrdProps[Eval[Int]].partialOrd,
-      OrdProps[Eval[Int]].ord,
-      HashProps[Eval[Int]].hash,
-      SemigroupProps[Eval[String]].semigroup,
-      MonoidProps[Eval[String]].monoid,
-      FunctorProps[Eval].functor[MinInt, MinInt, MinInt],
-      ApplicativeProps[Eval].applicative[MinInt, MinInt, MinInt],
-      MonadProps[Eval].monad[MinInt, MinInt, MinInt],
-      DeferProps[Eval].defer[Int]
+      OrdProps[Eval[Int]].all,
+      HashProps[Eval[Int]].all,
+      MonoidProps[Eval[String]].all,
+      MonadProps[Eval].all[MinInt, MinInt, MinInt],
+      DeferProps[Eval].all[Int]
     )
 }

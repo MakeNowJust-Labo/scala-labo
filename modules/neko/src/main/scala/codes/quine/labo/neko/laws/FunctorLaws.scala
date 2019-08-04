@@ -2,7 +2,7 @@ package codes.quine.labo
 package neko
 package laws
 
-import syntax._, instances._
+import instances._, syntax._
 
 trait FunctorLaws[F[_]] {
   implicit val F: Functor[F]

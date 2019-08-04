@@ -2,13 +2,12 @@ package codes.quine.labo
 package neko
 package props
 
-import laws._, instances._
-
 import scalaprops._
+import instances._, laws._
 
 trait EqProps[A] {
   val laws: EqLaws[A]
-  import laws._ // to use Eq[A] instance
+  import laws._
 
   def eqReflectivity(implicit ga: Gen[A]): Property =
     Property.forAll(laws.eqReflexivity(_: A))
@@ -22,13 +21,16 @@ trait EqProps[A] {
   def eqTransivity(implicit ga: Gen[A]): Property =
     Property.forAll(laws.eqTransivity(_: A, _: A, _: A))
 
-  def eq(implicit ga: Gen[A], gf: Gen[A => A]): Properties[NekoLaw] =
+  def props(implicit ga: Gen[A], gf: Gen[A => A]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.eq)(
       NekoLaw.eqReflexivity -> eqReflectivity,
       NekoLaw.eqSymmetry -> eqSymmetry,
       NekoLaw.eqAntiSymmetry -> eqAntiSymmetry,
       NekoLaw.eqTransivity -> eqTransivity
     )
+
+  def all(implicit ga: Gen[A], gf: Gen[A => A]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.eqAll, props)
 }
 
 object EqProps {

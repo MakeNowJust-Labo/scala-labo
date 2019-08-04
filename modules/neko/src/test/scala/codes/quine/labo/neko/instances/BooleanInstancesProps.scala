@@ -7,9 +7,7 @@ import props._
 
 object BooleanInstancesProps extends Scalaprops {
   val laws = Properties.list(
-    EqProps[Boolean].eq,
-    PartialOrdProps[Boolean].partialOrd,
-    OrdProps[Boolean].ord,
-    HashProps[Boolean].hash
+    OrdProps[Boolean].all,
+    HashProps[Boolean].all
   )
 }

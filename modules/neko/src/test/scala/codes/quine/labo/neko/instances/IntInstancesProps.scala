@@ -7,9 +7,7 @@ import props._
 
 object IntInstancesProps extends Scalaprops {
   val laws = Properties.list(
-    EqProps[Int].eq,
-    PartialOrdProps[Int].partialOrd,
-    OrdProps[Int].ord,
-    HashProps[Int].hash
+    OrdProps[Int].all,
+    HashProps[Int].all
   )
 }

@@ -2,12 +2,12 @@ package codes.quine.labo
 package neko
 package props
 
-import laws._
-
 import scalaprops._
+import laws._
 
 trait MonoidKProps[F[_]] {
   val laws: MonoidKLaws[F]
+  import laws._
 
   def monoidKLeftIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.monoidKLeftIdentity(_: F[A]))
@@ -15,11 +15,14 @@ trait MonoidKProps[F[_]] {
   def monoidKRightIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.monoidKRightIdentity(_: F[A]))
 
-  def monoidK[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
+  def props[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.monoidK)(
       NekoLaw.monoidKLeftIdentity -> monoidKLeftIdentity,
       NekoLaw.monoidKRightIdentity -> monoidKRightIdentity
     )
+
+  def all[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.monoidKAll, SemigroupKProps[F].all[A], props[A])
 }
 
 object MonoidKProps {

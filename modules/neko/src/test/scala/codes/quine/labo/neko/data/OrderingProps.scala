@@ -10,11 +10,8 @@ object OrderingProps extends Scalaprops {
   implicit val orderingCogenInstance: Cogen[Ordering] = Cogen[Int].contramap(_.toInt)
 
   val laws = Properties.list(
-    EqProps[Ordering].eq,
-    PartialOrdProps[Ordering].partialOrd,
-    OrdProps[Ordering].ord,
-    HashProps[Ordering].hash,
-    SemigroupProps[Ordering].semigroup,
-    MonoidProps[Ordering].monoid
+    OrdProps[Ordering].all,
+    HashProps[Ordering].all,
+    MonoidProps[Ordering].all
   )
 }

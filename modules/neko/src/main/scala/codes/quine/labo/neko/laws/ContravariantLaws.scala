@@ -2,7 +2,7 @@ package codes.quine.labo
 package neko
 package laws
 
-import syntax._, instances._
+import instances._, syntax._
 
 trait ContravariantLaws[F[_]] {
   implicit val F: Contravariant[F]

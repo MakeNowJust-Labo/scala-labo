@@ -2,12 +2,12 @@ package codes.quine.labo
 package neko
 package props
 
+import scalaprops._
 import laws._
 
-import scalaprops._
-
-trait MonadProps[F[_]] extends ApplicativeProps[F] {
+trait MonadProps[F[_]] {
   val laws: MonadLaws[F]
+  import laws._
 
   def monadLeftIdentity[A, B](implicit ga: Gen[A], gf: Gen[A => F[B]], efb: Eq[F[B]]): Property =
     Property.forAll(laws.monadLeftIdentity(_: A, _: A => F[B]))
@@ -23,7 +23,7 @@ trait MonadProps[F[_]] extends ApplicativeProps[F] {
 
   def tailRecMStackSafety(implicit ef: Eq[F[Int]]): Property = Property.prop(laws.tailRecMStackSafety)
 
-  def monad[A, B, C](implicit ga: Gen[A],
+  def props[A, B, C](implicit ga: Gen[A],
                      gfa: Gen[F[A]],
                      gf: Gen[A => F[B]],
                      gg: Gen[B => F[C]],
@@ -37,6 +37,20 @@ trait MonadProps[F[_]] extends ApplicativeProps[F] {
       NekoLaw.monadAssociativity -> monadAssociativity[A, B, C],
       NekoLaw.monadTailRecMStackSafety -> tailRecMStackSafety
     )
+
+  def all[A, B, C](implicit ga: Gen[A],
+                   gfa: Gen[F[A]],
+                   gf0: Gen[A => B],
+                   gg0: Gen[B => C],
+                   gf: Gen[A => F[B]],
+                   gg: Gen[B => F[C]],
+                   gff: Gen[F[A => B]],
+                   gfg: Gen[F[B => C]],
+                   efa: Eq[F[A]],
+                   efb: Eq[F[B]],
+                   efc: Eq[F[C]],
+                   ef: Eq[F[Int]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.monadAll, ApplicativeProps[F].all[A, B, C], props[A, B, C])
 }
 
 object MonadProps {

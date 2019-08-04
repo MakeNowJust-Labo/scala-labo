@@ -18,14 +18,22 @@ trait ContravariantProps[F[_]] {
                                         efc: Eq[F[C]]): Property =
     Property.forAll(laws.contravariantComposition(_: F[A], _: B => A, _: C => B))
 
-  def contravariant[A, B, C](implicit gfa: Gen[F[A]],
-                             gf: Gen[B => A],
-                             gg: Gen[C => B],
-                             efa: Eq[F[A]],
-                             efc: Eq[F[C]]): Properties[NekoLaw] = Properties.properties(NekoLaw.contravariant)(
-    NekoLaw.contravariantIdentity -> contravariantIdentity[A],
-    NekoLaw.contravariantComposition -> contravariantComposition[A, B, C]
-  )
+  def props[A, B, C](implicit gfa: Gen[F[A]],
+                     gf: Gen[B => A],
+                     gg: Gen[C => B],
+                     efa: Eq[F[A]],
+                     efc: Eq[F[C]]): Properties[NekoLaw] =
+    Properties.properties(NekoLaw.contravariant)(
+      NekoLaw.contravariantIdentity -> contravariantIdentity[A],
+      NekoLaw.contravariantComposition -> contravariantComposition[A, B, C]
+    )
+
+  def all[A, B, C](implicit gfa: Gen[F[A]],
+                   gf: Gen[B => A],
+                   gg: Gen[C => B],
+                   efa: Eq[F[A]],
+                   efc: Eq[F[C]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.contravariantAll, props[A, B, C])
 }
 
 object ContravariantProps {

@@ -7,15 +7,9 @@ import props._
 
 object OptionInstancesProps extends Scalaprops {
   val laws = Properties.list(
-    EqProps[Option[Int]].eq,
-    PartialOrdProps[Option[Int]].partialOrd,
-    OrdProps[Option[Int]].ord,
-    HashProps[Option[Int]].hash,
-    FunctorProps[Option].functor[Int, Int, Int],
-    ApplicativeProps[Option].applicative[Int, Int, Int],
-    MonadProps[Option].monad[Int, Int, Int],
-    SemigroupKProps[Option].semigroupK[Int],
-    MonoidKProps[Option].monoidK[Int],
-    AlternativeProps[Option].alternative[Int, Int]
+    OrdProps[Option[Int]].all,
+    HashProps[Option[Int]].all,
+    MonadProps[Option].all[Int, Int, Int],
+    AlternativeProps[Option].all[Int, Int, Int]
   )
 }

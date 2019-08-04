@@ -2,9 +2,8 @@ package codes.quine.labo
 package neko
 package props
 
-import laws._, instances._
-
 import scalaprops._
+import laws._, instances._
 
 trait DeferProps[F[_]] {
   val laws: DeferLaws[F]
@@ -18,12 +17,15 @@ trait DeferProps[F[_]] {
   def deferStackSafety[A](implicit gfa: Gen[Unit => F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.deferStackSafety(_: Unit => F[A]))
 
-  def defer[A](implicit gfa: Gen[F[A]], gufa: Gen[Unit => F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
+  def props[A](implicit gfa: Gen[F[A]], gufa: Gen[Unit => F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.defer)(
       NekoLaw.deferIdentity -> deferIdentity[A],
       NekoLaw.deferDoesNotEvaluate -> deferDoesNotEvaluate[A],
       NekoLaw.deferStackSafety -> deferStackSafety[A]
     )
+
+  def all[A](implicit gfa: Gen[F[A]], gufa: Gen[Unit => F[A]], efa: Eq[F[A]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.deferAll, props[A])
 }
 
 object DeferProps {

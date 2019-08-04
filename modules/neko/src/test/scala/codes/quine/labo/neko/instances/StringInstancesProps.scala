@@ -9,11 +9,8 @@ object StringInstancesProps extends Scalaprops {
   implicit val stringGenInstance: Gen[String] = Gen.asciiString
 
   val laws = Properties.list(
-    EqProps[String].eq,
-    PartialOrdProps[String].partialOrd,
-    OrdProps[String].ord,
-    HashProps[String].hash,
-    SemigroupProps[String].semigroup,
-    MonoidProps[String].monoid
+    OrdProps[String].all,
+    HashProps[String].all,
+    MonoidProps[String].all
   )
 }

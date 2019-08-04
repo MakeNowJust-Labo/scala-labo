@@ -2,12 +2,12 @@ package codes.quine.labo
 package neko
 package props
 
+import scalaprops._
 import laws._
 
-import scalaprops._
-
-trait ApplicativeProps[F[_]] extends FunctorProps[F] {
+trait ApplicativeProps[F[_]] {
   val laws: ApplicativeLaws[F]
+  import laws._
 
   def applicativeIdentity[A](implicit gfa: Gen[F[A]], efa: Eq[F[A]]): Property =
     Property.forAll(laws.applicativeIdentity(_: F[A]))
@@ -27,14 +27,14 @@ trait ApplicativeProps[F[_]] extends FunctorProps[F] {
                                       efc: Eq[F[C]]): Property =
     Property.forAll(laws.applicativeComposition(_: F[A], _: F[A => B], _: F[B => C]))
 
-  def applicative[A, B, C](implicit ga: Gen[A],
-                           gfa: Gen[F[A]],
-                           gf: Gen[A => B],
-                           gff: Gen[F[A => B]],
-                           gfg: Gen[F[B => C]],
-                           efa: Eq[F[A]],
-                           efb: Eq[F[B]],
-                           efc: Eq[F[C]]): Properties[NekoLaw] =
+  def props[A, B, C](implicit ga: Gen[A],
+                     gfa: Gen[F[A]],
+                     gf: Gen[A => B],
+                     gff: Gen[F[A => B]],
+                     gfg: Gen[F[B => C]],
+                     efa: Eq[F[A]],
+                     efb: Eq[F[B]],
+                     efc: Eq[F[C]]): Properties[NekoLaw] =
     Properties
       .properties(NekoLaw.applicative)(
         NekoLaw.applicativeIdentity -> applicativeIdentity[A],
@@ -44,6 +44,17 @@ trait ApplicativeProps[F[_]] extends FunctorProps[F] {
         NekoLaw.applicativeMap -> applicativeMap[A, B]
       )
       .andThenParam(Param.maxSize(20))
+
+  def all[A, B, C](implicit ga: Gen[A],
+                   gfa: Gen[F[A]],
+                   gf: Gen[A => B],
+                   gg: Gen[B => C],
+                   gff: Gen[F[A => B]],
+                   gfg: Gen[F[B => C]],
+                   efa: Eq[F[A]],
+                   efb: Eq[F[B]],
+                   efc: Eq[F[C]]): Properties[NekoLaw] =
+    Properties.fromProps(NekoLaw.applicativeAll, FunctorProps[F].all[A, B, C], props[A, B, C])
 }
 
 object ApplicativeProps {

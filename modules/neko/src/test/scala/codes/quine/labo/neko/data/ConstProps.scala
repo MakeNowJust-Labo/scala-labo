@@ -11,14 +11,10 @@ object ConstProps extends Scalaprops {
   implicit def constCogenInstance[A: Cogen, B]: Cogen[Const[A, B]] = Cogen[A].contramap(_.value)
 
   val laws = Properties.list(
-    EqProps[Const[Int, Int]].eq,
-    PartialOrdProps[Const[Int, Int]].partialOrd,
-    OrdProps[Const[Int, Int]].ord,
-    HashProps[Const[Int, Int]].hash,
-    SemigroupProps[Const[String, Int]].semigroup,
-    MonoidProps[Const[String, Int]].monoid,
-    FunctorProps[Const[Int, *]].functor[Int, Int, Int],
-    ApplicativeProps[Const[String, *]].applicative[Int, Int, Int],
-    ContravariantProps[Const[Int, *]].contravariant[Int, Int, Int]
+    OrdProps[Const[Int, Int]].all,
+    HashProps[Const[Int, Int]].all,
+    MonoidProps[Const[String, Int]].all,
+    ApplicativeProps[Const[String, *]].all[Int, Int, Int],
+    ContravariantProps[Const[Int, *]].all[Int, Int, Int]
   )
 }
