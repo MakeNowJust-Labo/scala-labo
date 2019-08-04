@@ -14,9 +14,9 @@ private[instances] trait SetInstances0 extends SetInstances1 {
     def tryCmp(x: Set[A], y: Set[A]): Option[Ordering] =
       (x, y) match {
         case (xs, ys) if xs.size == ys.size => if (xs == ys) Some(Ordering.EQ) else None
-        case (xs, ys) if xs.size < ys.size => if (xs.subsetOf(ys)) Some(Ordering.LT) else None
-        case (xs, ys) if xs.size > ys.size => if (ys.subsetOf(xs)) Some(Ordering.GT) else None
-        case _ => None // here is unreachable.
+        case (xs, ys) if xs.size < ys.size  => if (xs.subsetOf(ys)) Some(Ordering.LT) else None
+        case (xs, ys) if xs.size > ys.size  => if (ys.subsetOf(xs)) Some(Ordering.GT) else None
+        case _                              => None // here is unreachable.
       }
 
     override def eqv(x: Set[A], y: Set[A]): Boolean = x == y

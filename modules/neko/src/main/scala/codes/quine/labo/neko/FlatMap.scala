@@ -8,7 +8,7 @@ import simulacrum.typeclass
 
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
     tailRecM[Option[A], B](None) {
-      case None => map(fa)(a => Left(Some(a)))
+      case None    => map(fa)(a => Left(Some(a)))
       case Some(a) => map(f(a))(Right(_))
     }
 

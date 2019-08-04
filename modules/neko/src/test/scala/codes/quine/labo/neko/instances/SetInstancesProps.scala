@@ -10,6 +10,6 @@ object SetInstancesProps extends Scalaprops {
     PartialOrdProps[Set[Int]].all,
     HashProps[Set[Int]].all,
     MonoidProps[Set[Int]].all,
-    MonoidKProps[Set].all[Int],
+    MonoidKProps[Set].all[Int]
   )
 }

@@ -18,27 +18,28 @@ private[instances] trait MapInstances0 {
 
       @tailrec def loop(k: K, e: Either[A, B]): Unit =
         e match {
-          case Left(a) => f(a).get(k) match {
-            case Some(e1) => loop(k, e1)
-            case None => ()
-          }
+          case Left(a) =>
+            f(a).get(k) match {
+              case Some(e1) => loop(k, e1)
+              case None     => ()
+            }
           case Right(b) => buf += ((k, b))
         }
 
-        f(a).foreach { case (k, e) => loop(k, e) }
-        buf.result
+      f(a).foreach { case (k, e) => loop(k, e) }
+      buf.result
     }
   }
 
   implicit def mapEqInstance[K, A: Eq]: Eq[Map[K, A]] = new Eq[Map[K, A]] {
-    def eqv(x: Map[K, A], y: Map[K, A]): Boolean = {
+    def eqv(x: Map[K, A], y: Map[K, A]): Boolean =
       x.size == y.size && x.forall {
-        case (k, xv) => y.get(k) match {
-          case Some(yv) => xv === yv
-          case None => false
-        }
+        case (k, xv) =>
+          y.get(k) match {
+            case Some(yv) => xv === yv
+            case None     => false
+          }
       }
-    }
   }
 
   implicit def mapHashInstances[K, A: Hash]: Hash[Map[K, A]] = new Hash[Map[K, A]] {

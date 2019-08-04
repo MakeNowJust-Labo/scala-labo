@@ -15,10 +15,8 @@ trait FlatMapProps[F[_]] {
                                     efc: Eq[F[C]]): Property =
     Property.forAll(laws.flatMapAssociativity(_: F[A], _: A => F[B], _: B => F[C]))
 
-  def flatMapTailRecMConsistency[A, B](implicit gfa: Gen[F[A]],
-                                       gf: Gen[A => F[B]],
-                                       efb: Eq[F[B]]): Property =
-                                       Property.forAll(laws.flatMapTailRecMConsistency(_: F[A], _: A => F[B]))
+  def flatMapTailRecMConsistency[A, B](implicit gfa: Gen[F[A]], gf: Gen[A => F[B]], efb: Eq[F[B]]): Property =
+    Property.forAll(laws.flatMapTailRecMConsistency(_: F[A], _: A => F[B]))
 
   def props[A, B, C](implicit gfa: Gen[F[A]],
                      gf: Gen[A => F[B]],
@@ -27,7 +25,7 @@ trait FlatMapProps[F[_]] {
                      efc: Eq[F[C]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.flatMap)(
       NekoLaw.flatMapAssociativity -> flatMapAssociativity[A, B, C],
-      NekoLaw.flatMapTailRecMConsistency -> flatMapTailRecMConsistency[A, B],
+      NekoLaw.flatMapTailRecMConsistency -> flatMapTailRecMConsistency[A, B]
     )
 
   def all[A, B, C](implicit gfa: Gen[F[A]],

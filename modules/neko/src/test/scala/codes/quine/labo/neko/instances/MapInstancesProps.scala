@@ -8,6 +8,6 @@ import props._
 object MapInstancesProps extends Scalaprops {
   val laws = Properties.list(
     HashProps[Map[Int, Int]].all,
-    FlatMapProps[Map[Int, *]].all[Int, Int, Int],
+    FlatMapProps[Map[Int, *]].all[Int, Int, Int]
   )
 }
