@@ -81,6 +81,7 @@ object NekoLaw {
   val flatMap: NekoLaw = law("flatMap")
   val flatMapAll: NekoLaw = all(flatMap)
   val flatMapAssociativity: NekoLaw = law0(flatMap, "associativity")
+  val flatMapTailRecMConsistency: NekoLaw = law0(flatMap, "tailRecM consistency")
 
   val monad: NekoLaw = law("monad")
   val monadAll: NekoLaw = all(monad)

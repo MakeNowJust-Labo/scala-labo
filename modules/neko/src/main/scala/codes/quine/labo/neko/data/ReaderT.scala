@@ -42,9 +42,9 @@ object ReaderT {
       with Monad[ReaderT[E, M, ?]] {
     implicit def M: Monad[M]
 
-    def flatMap[A, B](fa: ReaderT[E, M, A])(f: A => ReaderT[E, M, B]): ReaderT[E, M, B] = fa.flatMap(f)
+    override def flatMap[A, B](fa: ReaderT[E, M, A])(f: A => ReaderT[E, M, B]): ReaderT[E, M, B] = fa.flatMap(f)
 
-    override def tailRecM[A, B](a: A)(f: A => ReaderT[E, M, Either[A, B]]): ReaderT[E, M, B] =
+    def tailRecM[A, B](a: A)(f: A => ReaderT[E, M, Either[A, B]]): ReaderT[E, M, B] =
       ReaderT(e => M.tailRecM(a)(f(_).run(e)))
   }
 

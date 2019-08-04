@@ -16,10 +16,10 @@ object Id extends IdInstances0
 private[data] trait IdInstances0 extends IdInstances1 {
   implicit val idMonadInstance: Monad[Id] = new Monad[Id] {
     def pure[A](a: A): Id[A] = Id(a)
-    def flatMap[A, B](fa: Id[A])(f: A => Id[B]): Id[B] = fa.flatMap(f)
+    override def flatMap[A, B](fa: Id[A])(f: A => Id[B]): Id[B] = fa.flatMap(f)
 
     @tailrec
-    override def tailRecM[A, B](a: A)(f: A => Id[Either[A, B]]): Id[B] =
+    def tailRecM[A, B](a: A)(f: A => Id[Either[A, B]]): Id[B] =
       f(a).value match {
         case Right(b) => Id(b)
         case Left(a0) => tailRecM(a0)(f)

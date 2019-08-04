@@ -10,7 +10,7 @@ trait VectorInstances extends VectorInstances0
 private[instances] trait VectorInstances0 extends VectorInstances1 {
   implicit val vectorMonadInstance: Monad[Vector] = new Monad[Vector] {
     def pure[A](a: A): Vector[A] = Vector(a)
-    def flatMap[A, B](fa: Vector[A])(f: A => Vector[B]): Vector[B] = fa.flatMap(f)
+    override def flatMap[A, B](fa: Vector[A])(f: A => Vector[B]): Vector[B] = fa.flatMap(f)
 
     override def tailRecM[A, B](a: A)(f: A => Vector[Either[A, B]]): Vector[B] = {
       val buf = Vector.newBuilder[B]
@@ -23,7 +23,7 @@ private[instances] trait VectorInstances0 extends VectorInstances1 {
             ab match {
               case Right(b) =>
                 buf += b
-                go(tail)
+                go(abs :: tail)
               case Left(a) => go(f(a) :: abs :: tail)
             }
         }

@@ -10,10 +10,10 @@ trait OptionInstances extends OptionInstances0
 private[instances] trait OptionInstances0 extends OptionInstances1 {
   implicit val optionMonadInstance: Monad[Option] = new Monad[Option] {
     def pure[A](a: A): Option[A] = Some(a)
-    def flatMap[A, B](fa: Option[A])(f: A => Option[B]): Option[B] = fa.flatMap(f)
+    override def flatMap[A, B](fa: Option[A])(f: A => Option[B]): Option[B] = fa.flatMap(f)
 
     @tailrec
-    override def tailRecM[A, B](a: A)(f: A => Option[Either[A, B]]): Option[B] =
+    def tailRecM[A, B](a: A)(f: A => Option[Either[A, B]]): Option[B] =
       f(a) match {
         case Some(Right(b)) => Some(b)
         case Some(Left(a0)) => tailRecM(a0)(f)

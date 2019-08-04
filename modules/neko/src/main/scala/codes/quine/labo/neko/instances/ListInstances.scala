@@ -11,10 +11,10 @@ private[instances] trait ListInstances0 extends ListInstances1 {
   implicit val listMonadInstance: Monad[List] = new Monad[List] {
     def pure[A](a: A): List[A] = List(a)
 
-    def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
+    override def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
       fa.flatMap(f)
 
-    override def tailRecM[A, B](a: A)(f: A => List[Either[A, B]]): List[B] = {
+    def tailRecM[A, B](a: A)(f: A => List[Either[A, B]]): List[B] = {
       val buf = List.newBuilder[B]
       @tailrec
       def go(stack: List[List[Either[A, B]]]): Unit =

@@ -13,10 +13,10 @@ object StateT {
     new Monad[StateT[S, M, ?]] {
       def pure[A](a: A): StateT[S, M, A] = StateT(s => M.pure((s, a)))
 
-      def flatMap[A, B](fa: StateT[S, M, A])(f: A => StateT[S, M, B]): StateT[S, M, B] =
+      override def flatMap[A, B](fa: StateT[S, M, A])(f: A => StateT[S, M, B]): StateT[S, M, B] =
         StateT(s1 => M.flatMap(fa.run(s1)) { case (s2, a) => f(a).run(s2) })
 
-      override def tailRecM[A, B](a: A)(f: A => StateT[S, M, Either[A, B]]): StateT[S, M, B] =
+      def tailRecM[A, B](a: A)(f: A => StateT[S, M, Either[A, B]]): StateT[S, M, B] =
         StateT(
           s =>
             M.tailRecM[(S, A), (S, B)]((s, a)) {
