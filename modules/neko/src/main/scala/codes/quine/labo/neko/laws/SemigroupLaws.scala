@@ -8,7 +8,7 @@ trait SemigroupLaws[A] {
   implicit val A: Semigroup[A]
 
   def semigroupAssociativity(x: A, y: A, z: A): IsEq[A] =
-    ((x <> y) <> z) <-> (x <> (y <> z))
+    ((x |+| y) |+| z) <-> (x |+| (y |+| z))
 }
 
 object SemigroupLaws {

@@ -8,4 +8,5 @@ class AllInstances
     with IntInstances
     with ListInstances
     with OptionInstances
+    with StringInstances
     with VectorInstances

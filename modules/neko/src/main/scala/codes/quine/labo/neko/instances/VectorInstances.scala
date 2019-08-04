@@ -3,25 +3,14 @@ package neko
 package instances
 
 import scala.annotation.tailrec
+import data._, syntax._
 
-import syntax._
+trait VectorInstances extends VectorInstances0
 
-trait VectorInstances {
-  implicit def VectorEq[A: Eq]: Eq[Vector[A]] = new Eq[Vector[A]] {
-    @tailrec
-    def eqv(x: Vector[A], y: Vector[A]): Boolean =
-      (x, y) match {
-        case (Vector(), Vector())          => true
-        case (a +: xs, b +: ys) if a === b => eqv(xs, ys)
-        case _                             => false
-      }
-  }
-
-  implicit object VectorInstances extends Alternative[Vector] with Monad[Vector] {
+private[instances] trait VectorInstances0 extends VectorInstances1 {
+  implicit val vectorMonadInstance: Monad[Vector] = new Monad[Vector] {
     def pure[A](a: A): Vector[A] = Vector(a)
-
-    def flatMap[A, B](fa: Vector[A])(f: A => Vector[B]): Vector[B] =
-      fa.flatMap(f)
+    def flatMap[A, B](fa: Vector[A])(f: A => Vector[B]): Vector[B] = fa.flatMap(f)
 
     override def tailRecM[A, B](a: A)(f: A => Vector[Either[A, B]]): Vector[B] = {
       val buf = Vector.newBuilder[B]
@@ -43,9 +32,62 @@ trait VectorInstances {
     }
 
     override def map[A, B](fa: Vector[A])(f: A => B): Vector[B] = fa.map(f)
+  }
 
-    def emptyK[A]: Vector[A] = Vector.empty[A]
+  implicit def vectorEqInstance[A: Eq]: Eq[Vector[A]] = new Eq[Vector[A]] {
+    @tailrec
+    def eqv(x: Vector[A], y: Vector[A]): Boolean =
+      (x, y) match {
+        case (Vector(), Vector())              => true
+        case (x0 +: xs, y0 +: ys) if x0 === y0 => eqv(xs, ys)
+        case _                                 => false
+      }
+  }
 
-    def concatK[A](x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  implicit def vectorPartialOrdInstance[A: PartialOrd]: PartialOrd[Vector[A]] = new PartialOrd[Vector[A]] {
+    @tailrec
+    def tryCmp(x: Vector[A], y: Vector[A]): Option[Ordering] =
+      (x, y) match {
+        case (Vector(), Vector()) => Some(Ordering.EQ)
+        case (Vector(), _)        => Some(Ordering.LT)
+        case (_, Vector())        => Some(Ordering.GT)
+        case (x0 +: xs, y0 +: ys) =>
+          PartialOrd[A].tryCmp(x0, y0) match {
+            case Some(Ordering.EQ) => tryCmp(xs, ys)
+            case result            => result
+          }
+      }
+  }
+
+  implicit def vectorOrdInstance[A: Ord]: Ord[Vector[A]] = new Ord[Vector[A]] {
+    @tailrec
+    def cmp(x: Vector[A], y: Vector[A]): Ordering =
+      (x, y) match {
+        case (Vector(), Vector()) => Ordering.EQ
+        case (Vector(), _)        => Ordering.LT
+        case (_, Vector())        => Ordering.GT
+        case (x0 +: xs, y0 +: ys) =>
+          (x0 <=> y0) match {
+            case Ordering.EQ => cmp(xs, ys)
+            case result      => result
+          }
+      }
   }
 }
+
+private[instances] trait VectorInstances1 { self: VectorInstances0 =>
+  implicit val vectorAlternativeInstance: Alternative[Vector] = new Alternative[Vector] {
+    def pure[A](a: A): Vector[A] = Vector(a)
+    def ap[A, B](ff: Vector[A => B])(fa: Vector[A]): Vector[B] = ff.flatMap(f => fa.map(f))
+    override def map[A, B](fa: Vector[A])(f: A => B): Vector[B] = fa.map(f)
+    def emptyK[A]: Vector[A] = Vector.empty
+    def concatK[A](x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  }
+
+  implicit def vectorHashInstance[A: Hash]: Hash[Vector[A]] = new Hash[Vector[A]] {
+    def eqv(x: Vector[A], y: Vector[A]): Boolean = self.vectorEqInstance[A].eqv(x, y)
+    def hash(x: Vector[A]): Int = x.foldLeft("Vector".hash)(_ * 31 + _.hash)
+  }
+}
+
+package object vector extends VectorInstances

@@ -3,21 +3,12 @@ package neko
 package instances
 
 import scala.annotation.tailrec
+import data._, syntax._
 
-import syntax._
+trait ListInstances extends ListInstances0
 
-trait ListInstances {
-  implicit def ListEq[A: Eq]: Eq[List[A]] = new Eq[List[A]] {
-    @tailrec
-    def eqv(x: List[A], y: List[A]): Boolean =
-      (x, y) match {
-        case (Nil, Nil)                    => true
-        case (a :: xs, b :: ys) if a === b => eqv(xs, ys)
-        case _                             => false
-      }
-  }
-
-  implicit object ListInstances extends Alternative[List] with Monad[List] {
+private[instances] trait ListInstances0 extends ListInstances1 {
+  implicit val listMonadInstance: Monad[List] = new Monad[List] {
     def pure[A](a: A): List[A] = List(a)
 
     def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
@@ -44,22 +35,62 @@ trait ListInstances {
     }
 
     override def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
+  }
 
-    override def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] = {
-      val buf = List.newBuilder[B]
-      @tailrec
-      def go(funs: List[A => B]): Unit = funs match {
-        case f :: fs =>
-          buf ++= fa.map(f)
-          go(fs)
-        case Nil => ()
+  implicit def listEqInstance[A: Eq]: Eq[List[A]] = new Eq[List[A]] {
+    @tailrec
+    def eqv(x: List[A], y: List[A]): Boolean =
+      (x, y) match {
+        case (Nil, Nil)                        => true
+        case (x0 :: xs, y0 :: ys) if x0 === y0 => eqv(xs, ys)
+        case _                                 => false
       }
-      go(ff)
-      buf.result
-    }
+  }
 
-    def emptyK[A]: List[A] = List.empty
+  implicit def listPartialOrdInstance[A: PartialOrd]: PartialOrd[List[A]] = new PartialOrd[List[A]] {
+    @tailrec
+    def tryCmp(x: List[A], y: List[A]): Option[Ordering] =
+      (x, y) match {
+        case (Nil, Nil) => Some(Ordering.EQ)
+        case (Nil, _)   => Some(Ordering.LT)
+        case (_, Nil)   => Some(Ordering.GT)
+        case (x0 :: xs, y0 :: ys) =>
+          PartialOrd[A].tryCmp(x0, y0) match {
+            case Some(Ordering.EQ) => tryCmp(xs, ys)
+            case result            => result
+          }
+      }
+  }
 
-    def concatK[A](x: List[A], y: List[A]): List[A] = x ++ y
+  implicit def listOrdInstance[A: Ord]: Ord[List[A]] = new Ord[List[A]] {
+    @tailrec
+    def cmp(x: List[A], y: List[A]): Ordering =
+      (x, y) match {
+        case (Nil, Nil) => Ordering.EQ
+        case (Nil, _)   => Ordering.LT
+        case (_, Nil)   => Ordering.GT
+        case (x0 :: xs, y0 :: ys) =>
+          (x0 <=> y0) match {
+            case Ordering.EQ => cmp(xs, ys)
+            case result      => result
+          }
+      }
   }
 }
+
+private[instances] trait ListInstances1 { self: ListInstances0 =>
+  implicit val listAlternativeInstance: Alternative[List] = new Alternative[List] {
+    def pure[A](a: A): List[A] = List(a)
+    def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] = ff.flatMap(f => fa.map(f))
+    override def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
+    def emptyK[A]: List[A] = List.empty
+    def concatK[A](x: List[A], y: List[A]): List[A] = x ++ y
+  }
+
+  implicit def listHashInstance[A: Hash]: Hash[List[A]] = new Hash[List[A]] {
+    def eqv(x: List[A], y: List[A]): Boolean = self.listEqInstance[A].eqv(x, y)
+    def hash(x: List[A]): Int = x.foldLeft("List".hash)(_ * 31 + _.hash)
+  }
+}
+
+package object list extends ListInstances

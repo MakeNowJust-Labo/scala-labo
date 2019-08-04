@@ -46,6 +46,7 @@ object Ord {
   }
 
   def fromOrdering[A](implicit instance: math.Ordering[A]): Ord[A] = new Ord[A] {
+    override def eqv(x: A, y: A): Boolean = instance.equiv(x, y)
     def cmp(x: A, y: A): Ordering = Ordering.fromInt(instance.compare(x, y))
   }
 }

@@ -46,6 +46,7 @@ object PartialOrd {
   }
 
   def fromPartialOrdering[A](implicit instance: math.PartialOrdering[A]): PartialOrd[A] = new PartialOrd[A] {
+    override def eqv(x: A, y: A): Boolean = instance.equiv(x, y)
     def tryCmp(x: A, y: A): Option[Ordering] = instance.tryCompare(x, y).map(Ordering.fromInt(_))
   }
 }

@@ -3,6 +3,7 @@ package neko
 package data
 
 import scala.annotation.tailrec
+import syntax._
 
 sealed trait Eval[A] {
   import Eval._
@@ -18,9 +19,13 @@ sealed trait Eval[A] {
       case FlatMap(fa, f1) => FlatMap(fa, f1 :+ f)
       case _               => FlatMap(this, FunTree.lift(f))
     }
+
+  // It is only used for implementing `Semigroup[Eval[A]]` and `Monoid[Eval[A]]`.
+  private[data] def concat(that: Eval[A])(implicit A: Semigroup[A]): Eval[A] =
+    for { x <- this; y <- that } yield x |+| y
 }
 
-object Eval {
+object Eval extends EvalInstances0 {
   def now[A](a: A): Eval[A] = Now(a)
   def always[A](a: => A): Eval[A] = Always(a _)
   def later[A](a: => A): Eval[A] = Later(a _)
@@ -50,6 +55,11 @@ object Eval {
     /** An empty function composition (Eval.now: A => Eval[A]). */
     final case class Empty[A]() extends FunTree[A, A]
 
+    object Empty {
+      private[this] val instance: Empty[Any] = new Empty[Any]
+      def apply[A]: Empty[A] = instance.asInstanceOf[Empty[A]]
+    }
+
     /** A single A => Eval[B] function.  */
     final case class Leaf[A, B](f: A => Eval[B]) extends FunTree[A, B]
 
@@ -57,7 +67,7 @@ object Eval {
     final case class Node[A, B, C](l: FunTree[A, B], r: FunTree[B, C]) extends FunTree[A, C]
 
     def lift[A, B](f: A => Eval[B]): FunTree[A, B] = Leaf(f)
-    def empty[A]: FunTree[A, A] = Empty()
+    def empty[A]: FunTree[A, A] = Empty[A]
 
     def concat[A, B, C](l: FunTree[A, B], r: FunTree[B, C]): FunTree[A, C] =
       (l, r) match {
@@ -76,11 +86,17 @@ object Eval {
     import FunTree._
 
     final case class FLNil[A]() extends FunList[A, A]
+
+    object FLNil {
+      private[this] val instance: FLNil[Any] = new FLNil[Any]
+      def apply[A]: FLNil[A] = instance.asInstanceOf[FLNil[A]]
+    }
+
     final case class FLCons[A, B, C](f: A => Eval[B], k: FunTree[B, C]) extends FunList[A, C]
 
     def from[A, B](f: FunTree[A, B]): FunList[A, B] =
       f match {
-        case _: Empty[A]   => FLNil()
+        case _: Empty[A]   => FLNil[A]
         case l: Leaf[A, B] => FLCons(l.f, FunTree.empty)
         case Node(l, r) =>
           @tailrec def loop[A1, B1, C1](l: FunTree[A1, B1], r: FunTree[B1, C1]): FunList[A1, C1] =
@@ -157,14 +173,41 @@ object Eval {
 
     loop(fa, FunTree.empty[A])
   }
+}
 
-  implicit def EvalEqInstances[A: Eq]: Eq[Eval[A]] = Eq[A].by(_.value)
-
-  implicit object EvalInstances extends Monad[Eval] with neko.Defer[Eval] {
-    def pure[A](a: A): Eval[A] = Now(a)
+private[data] trait EvalInstances0 extends EvalInstances1 {
+  implicit val evalMonadInstance: Monad[Eval] = new Monad[Eval] {
+    def pure[A](a: A): Eval[A] = Eval.now(a)
     def flatMap[A, B](fa: Eval[A])(f: A => Eval[B]): Eval[B] = fa.flatMap(f)
     override def map[A, B](fa: Eval[A])(f: A => B): Eval[B] = fa.map(f)
+  }
 
-    def defer[A](fa: => Eval[A]): Eval[A] = Defer(() => fa)
+  implicit val evalDeferInstance: Defer[Eval] = new Defer[Eval] {
+    def defer[A](fa: => Eval[A]): Eval[A] = Eval.defer(fa)
+  }
+
+  implicit def evalEqInstance[A: Eq]: Eq[Eval[A]] = Eq[A].by(_.value)
+  implicit def evalPartialOrdInstance[A: PartialOrd]: PartialOrd[Eval[A]] = PartialOrd[A].by(_.value)
+  implicit def evalOrdInstance[A: Ord]: Ord[Eval[A]] = Ord[A].by(_.value)
+
+  implicit def evalSemigroupInstance[A: Semigroup]: Semigroup[Eval[A]] = new Semigroup[Eval[A]] {
+    def concat(x: Eval[A], y: Eval[A]): Eval[A] = x.concat(y)
+  }
+
+  implicit def evalMonoidInstance[A: Monoid]: Monoid[Eval[A]] = new Monoid[Eval[A]] {
+    lazy val empty: Eval[A] = Eval.later(Monoid[A].empty)
+    def concat(x: Eval[A], y: Eval[A]): Eval[A] = x.concat(y)
+  }
+}
+
+private[data] trait EvalInstances1 {
+  implicit val evalComonadInstance: Comonad[Eval] = new Comonad[Eval] {
+    def extract[A](fa: Eval[A]): A = fa.value
+    def coflatMap[A, B](fa: Eval[A])(f: Eval[A] => B): Eval[B] = Eval.later(f(fa))
+  }
+
+  implicit def evalHashInstance[A: Hash]: Hash[Eval[A]] = new Hash[Eval[A]] {
+    def eqv(x: Eval[A], y: Eval[A]): Boolean = x.value === y.value
+    def hash(x: Eval[A]): Int = x.value.hash
   }
 }

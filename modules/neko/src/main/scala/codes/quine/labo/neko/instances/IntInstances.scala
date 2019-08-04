@@ -4,11 +4,22 @@ package instances
 
 import data._
 
-trait IntInstances {
-  implicit object IntInstances extends Ord[Int] {
+trait IntInstances extends IntInstances0
+
+private[instances] trait IntInstances0 extends IntInstances1 {
+  implicit val intOrdInstance: Ord[Int] = new Ord[Int] {
     override def eqv(x: Int, y: Int): Boolean = x == y
 
     def cmp(x: Int, y: Int): Ordering =
       if (x < y) Ordering.LT else if (x > y) Ordering.GT else Ordering.EQ
   }
 }
+
+private[instances] trait IntInstances1 {
+  implicit val intHashInstance: Hash[Int] = new Hash[Int] {
+    def eqv(x: Int, y: Int): Boolean = x == y
+    def hash(x: Int): Int = x.hashCode
+  }
+}
+
+package object int extends IntInstances
