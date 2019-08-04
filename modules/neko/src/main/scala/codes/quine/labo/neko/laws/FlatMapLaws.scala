@@ -13,7 +13,7 @@ trait FlatMapLaws[F[_]] {
   def flatMapTailRecMConsistency[A, B](fa: F[A], f: A => F[B]): IsEq[F[B]] = {
     def defaultFlatMap[A1, B1](fa: F[A1])(f: A1 => F[B1]): F[B1] =
       F.tailRecM[Option[A1], B1](None) {
-        case None => fa.map(a => Left(Some(a)))
+        case None    => fa.map(a => Left(Some(a)))
         case Some(a) => f(a).map(Right(_))
       }
 

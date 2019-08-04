@@ -15,7 +15,7 @@ trait MonoidKLaws[F[_]] {
 }
 
 object MonoidKLaws {
-  def apply[F[_]](implicit instance: MonoidK[F]): MonoidKLaws[F] = new MonoidKLaws[F] {
-    val F: MonoidK[F] = instance
+  def apply[F[_]: MonoidK]: MonoidKLaws[F] = new MonoidKLaws[F] {
+    val F: MonoidK[F] = MonoidK[F]
   }
 }

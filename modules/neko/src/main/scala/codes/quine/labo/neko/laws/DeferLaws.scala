@@ -27,7 +27,7 @@ trait DeferLaws[F[_]] {
 }
 
 object DeferLaws {
-  def apply[F[_]](implicit instance: Defer[F]): DeferLaws[F] = new DeferLaws[F] {
-    val F = instance
+  def apply[F[_]: Defer]: DeferLaws[F] = new DeferLaws[F] {
+    val F = Defer[F]
   }
 }

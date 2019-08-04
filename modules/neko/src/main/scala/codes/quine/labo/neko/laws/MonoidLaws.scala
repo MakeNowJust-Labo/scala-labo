@@ -15,7 +15,7 @@ trait MonoidLaws[A] {
 }
 
 object MonoidLaws {
-  def apply[A](implicit instance: Monoid[A]): MonoidLaws[A] = new MonoidLaws[A] {
-    val A: Monoid[A] = instance
+  def apply[A: Monoid]: MonoidLaws[A] = new MonoidLaws[A] {
+    val A: Monoid[A] = Monoid[A]
   }
 }

@@ -12,7 +12,7 @@ trait SemigroupLaws[A] {
 }
 
 object SemigroupLaws {
-  def apply[A](implicit instance: Semigroup[A]): SemigroupLaws[A] = new SemigroupLaws[A] {
-    val A: Semigroup[A] = instance
+  def apply[A: Semigroup]: SemigroupLaws[A] = new SemigroupLaws[A] {
+    val A: Semigroup[A] = Semigroup[A]
   }
 }

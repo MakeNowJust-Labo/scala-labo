@@ -10,7 +10,7 @@ trait OrdLaws[A] {
 }
 
 object OrdLaws {
-  def apply[A](implicit instance: Ord[A]): OrdLaws[A] = new OrdLaws[A] {
-    val A: Ord[A] = instance
+  def apply[A: Ord]: OrdLaws[A] = new OrdLaws[A] {
+    val A: Ord[A] = Ord[A]
   }
 }

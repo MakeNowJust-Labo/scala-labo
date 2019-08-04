@@ -16,7 +16,7 @@ trait PartialOrdLaws[A] {
 }
 
 object PartialOrdLaws {
-  def apply[A](implicit instance: PartialOrd[A]): PartialOrdLaws[A] = new PartialOrdLaws[A] {
-    val A: PartialOrd[A] = instance
+  def apply[A: PartialOrd]: PartialOrdLaws[A] = new PartialOrdLaws[A] {
+    val A: PartialOrd[A] = PartialOrd[A]
   }
 }

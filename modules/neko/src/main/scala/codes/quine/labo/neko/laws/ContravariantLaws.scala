@@ -15,7 +15,7 @@ trait ContravariantLaws[F[_]] {
 }
 
 object ContravariantLaws {
-  def apply[F[_]](implicit instance: Contravariant[F]): ContravariantLaws[F] = new ContravariantLaws[F] {
-    val F: Contravariant[F] = instance
+  def apply[F[_]: Contravariant]: ContravariantLaws[F] = new ContravariantLaws[F] {
+    val F: Contravariant[F] = Contravariant[F]
   }
 }

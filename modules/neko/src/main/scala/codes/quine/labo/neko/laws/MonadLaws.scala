@@ -21,7 +21,7 @@ trait MonadLaws[F[_]] {
 }
 
 object MonadLaws {
-  def apply[F[_]](implicit instance: Monad[F]): MonadLaws[F] = new MonadLaws[F] {
-    val F: Monad[F] = instance
+  def apply[F[_]: Monad]: MonadLaws[F] = new MonadLaws[F] {
+    val F: Monad[F] = Monad[F]
   }
 }

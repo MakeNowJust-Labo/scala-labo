@@ -10,7 +10,7 @@ trait HashLaws[A] {
 }
 
 object HashLaws {
-  def apply[A](implicit instance: Hash[A]): HashLaws[A] = new HashLaws[A] {
-    val A: Hash[A] = instance
+  def apply[A: Hash]: HashLaws[A] = new HashLaws[A] {
+    val A: Hash[A] = Hash[A]
   }
 }

@@ -14,7 +14,7 @@ trait ApplyLaws[F[_]] {
 }
 
 object ApplyLaws {
-  def apply[F[_]](implicit instance: Apply[F]): ApplyLaws[F] = new ApplyLaws[F] {
-    val F: Apply[F] = instance
+  def apply[F[_]: Apply]: ApplyLaws[F] = new ApplyLaws[F] {
+    val F: Apply[F] = Apply[F]
   }
 }
