@@ -4,6 +4,7 @@ package neko
 trait AllSyntax
     extends Alternative.ToAlternativeOps
     with Applicative.ToApplicativeOps
+    with Apply.ToApplyOps
     with Arrow.ToArrowOps
     with Category.ToCategoryOps
     with Comonad.ToComonadOps

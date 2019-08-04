@@ -67,12 +67,15 @@ object NekoLaw {
   val functorIdentity: NekoLaw = law0(functor, "identity")
   val functorComposition: NekoLaw = law0(functor, "composition")
 
+  val apply: NekoLaw = law("apply")
+  val applyAll: NekoLaw = all(apply)
+  val applyComposition: NekoLaw = law0(apply, "composition")
+
   val applicative: NekoLaw = law("applicative")
   val applicativeAll: NekoLaw = all(applicative)
   val applicativeIdentity: NekoLaw = law0(applicative, "identity")
   val applicativeHomomorphism: NekoLaw = law0(applicative, "homomorphism")
   val applicativeInterchange: NekoLaw = law0(applicative, "interchange")
-  val applicativeComposition: NekoLaw = law0(applicative, "composition")
   val applicativeMap: NekoLaw = law0(applicative, "map")
 
   val monad: NekoLaw = law("monad")

@@ -16,11 +16,6 @@ trait ApplicativeLaws[F[_]] {
   def applicativeInterchange[A, B](a: A, ff: F[A => B]): IsEq[F[B]] =
     (ff <*> F.pure(a)) <-> (F.pure((f: A => B) => f(a)) <*> ff)
 
-  def applicativeComposition[A, B, C](fa: F[A], ff: F[A => B], fg: F[B => C]): IsEq[F[C]] = {
-    val compose: (B => C) => (A => B) => (A => C) = _.compose
-    (fg <*> (ff <*> fa)) <-> ((fg.map(compose) <*> ff) <*> fa)
-  }
-
   def applicativeMap[A, B](fa: F[A], f: A => B): IsEq[F[B]] =
     fa.map(f) <-> (F.pure(f) <*> fa)
 }
