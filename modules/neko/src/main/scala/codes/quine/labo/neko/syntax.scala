@@ -6,7 +6,9 @@ trait AllSyntax
     with Applicative.ToApplicativeOps
     with Apply.ToApplyOps
     with Arrow.ToArrowOps
+    with Bimonad.ToBimonadOps
     with Category.ToCategoryOps
+    with CoflatMap.ToCoflatMapOps
     with Comonad.ToComonadOps
     with Contravariant.ToContravariantOps
     with Defer.ToDeferOps

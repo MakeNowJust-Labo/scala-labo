@@ -14,7 +14,7 @@ final case class Id[A](value: A) {
 object Id extends IdInstances0
 
 private[data] trait IdInstances0 extends IdInstances1 {
-  implicit val idMonadInstance: Monad[Id] = new Monad[Id] {
+  implicit val idBimonadInstance: Bimonad[Id] = new Bimonad[Id] {
     def pure[A](a: A): Id[A] = Id(a)
     override def flatMap[A, B](fa: Id[A])(f: A => Id[B]): Id[B] = fa.flatMap(f)
 
@@ -26,6 +26,9 @@ private[data] trait IdInstances0 extends IdInstances1 {
       }
 
     override def map[A, B](fa: Id[A])(f: A => B): Id[B] = fa.map(f)
+
+    def extract[A](fa: Id[A]): A = fa.value
+    def coflatMap[A, B](fa: Id[A])(f: Id[A] => B): Id[B] = Id(f(fa))
   }
 
   implicit def idEqInstance[A: Eq]: Eq[Id[A]] = Eq[A].by(_.value)
@@ -37,12 +40,6 @@ private[data] trait IdInstances0 extends IdInstances1 {
 }
 
 private[data] trait IdInstances1 {
-  implicit val idComonadInstance: Comonad[Id] = new Comonad[Id] {
-    def extract[A](fa: Id[A]): A = fa.value
-    def coflatMap[A, B](fa: Id[A])(f: Id[A] => B): Id[B] = Id(f(fa))
-    override def map[A, B](fa: Id[A])(f: A => B): Id[B] = fa.map(f)
-  }
-
   implicit def idHashInstance[A: Hash]: Hash[Id[A]] = new Hash[Id[A]] {
     def eqv(x: Id[A], y: Id[A]): Boolean = x.value === y.value
     def hash(x: Id[A]): Int = "Id".hash * 31 + x.value.hash

@@ -17,12 +17,12 @@ trait MonadProps[F[_]] {
 
   def monadTailRecMStackSafety(implicit ef: Eq[F[Int]]): Property = Property.prop(laws.monadTailRecMStackSafety)
 
-  def props[A, B, C](implicit ga: Gen[A],
-                     gfa: Gen[F[A]],
-                     gf: Gen[A => F[B]],
-                     efa: Eq[F[A]],
-                     efb: Eq[F[B]],
-                     ef: Eq[F[Int]]): Properties[NekoLaw] =
+  def props[A, B](implicit ga: Gen[A],
+                  gfa: Gen[F[A]],
+                  gf: Gen[A => F[B]],
+                  efa: Eq[F[A]],
+                  efb: Eq[F[B]],
+                  ef: Eq[F[Int]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.monad)(
       NekoLaw.monadLeftIdentity -> monadLeftIdentity[A, B],
       NekoLaw.monadRightIdentity -> monadRightIdentity[A],
@@ -41,10 +41,7 @@ trait MonadProps[F[_]] {
                    efb: Eq[F[B]],
                    efc: Eq[F[C]],
                    ef: Eq[F[Int]]): Properties[NekoLaw] =
-    Properties.fromProps(NekoLaw.monadAll,
-                         ApplicativeProps[F].all[A, B, C],
-                         FlatMapProps[F].all[A, B, C],
-                         props[A, B, C])
+    Properties.fromProps(NekoLaw.monadAll, ApplicativeProps[F].all[A, B, C], FlatMapProps[F].all[A, B, C], props[A, B])
 }
 
 object MonadProps {

@@ -14,6 +14,6 @@ object IdProps extends Scalaprops {
     OrdProps[Id[Int]].all,
     HashProps[Id[Int]].all,
     MonoidProps[Id[String]].all,
-    MonadProps[Id].all[Int, Int, Int]
+    BimonadProps[Id].all[Int, Int, Int]
   )
 }

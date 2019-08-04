@@ -90,6 +90,26 @@ object NekoLaw {
   val monadAssociativity: NekoLaw = law0(monad, "associativity")
   val monadTailRecMStackSafety: NekoLaw = law0(monad, "tailRecM stack safety")
 
+  val coflatMap: NekoLaw = law("coflatMap")
+  val coflatMapAll: NekoLaw = all(coflatMap)
+  val coflatMapAssociativity: NekoLaw = law0(coflatMap, "associativity")
+  val coflatMapCoherence: NekoLaw = law0(coflatMap, "coherence")
+  val coflatMapIdentity: NekoLaw = law0(coflatMap, "identity")
+
+  val comonad: NekoLaw = law("comonad")
+  val comonadAll: NekoLaw = all(comonad)
+  val comonadExtractCoflattenIdentity: NekoLaw = law0(comonad, "extract coflatten identity")
+  val comonadMapCoflattenIdentity: NekoLaw = law0(comonad, "map coflatten identity")
+  val comonadMapCoflatMapCoherence: NekoLaw = law0(comonad, "map coflatMap coherence")
+  val comonadLeftIdentity: NekoLaw = law0(comonad, "left identity")
+  val comonadRightIdnetity: NekoLaw = law0(comonad, "right identity")
+
+  val bimonad: NekoLaw = law("bimonad")
+  val bimonadAll: NekoLaw = all(bimonad)
+  val bimonadExtractPureIdentity: NekoLaw = law0(bimonad, "extract pure identity")
+  val bimonadExtractFlatMapEntwining: NekoLaw = law0(bimonad, "extract flatMap entwining")
+  val bimonadPureCoflatMapEntwining: NekoLaw = law0(bimonad, "pure coflatMap entwining")
+
   val contravariant: NekoLaw = law("contravariant")
   val contravariantAll: NekoLaw = all(contravariant)
   val contravariantIdentity: NekoLaw = law0(contravariant, "identity")
