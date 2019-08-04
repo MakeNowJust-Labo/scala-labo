@@ -2,7 +2,7 @@ package codes.quine.labo
 package neko
 package laws
 
-trait OrdLaws[A] extends PartialOrdLaws[A] {
+trait OrdLaws[A] {
   implicit val A: Ord[A]
 
   def ordTotality(x: A, y: A): IsEq[Boolean] =

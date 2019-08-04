@@ -4,7 +4,7 @@ package laws
 
 import syntax._
 
-trait MonoidLaws[A] extends SemigroupLaws[A] {
+trait MonoidLaws[A] {
   implicit val A: Monoid[A]
 
   def monoidLeftIdentity(x: A): IsEq[A] =

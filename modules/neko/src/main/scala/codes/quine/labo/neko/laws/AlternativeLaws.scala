@@ -4,8 +4,8 @@ package laws
 
 import syntax._
 
-trait AlternativeLaws[F[_]] extends ApplicativeLaws[F] with MonoidKLaws[F] {
-  implicit override val F: Alternative[F]
+trait AlternativeLaws[F[_]] {
+  implicit val F: Alternative[F]
 
   def alternativeRightAbsorption[A, B](ff: F[A => B]): IsEq[F[B]] =
     F.emptyK[B] <-> (ff <*> F.emptyK[A])

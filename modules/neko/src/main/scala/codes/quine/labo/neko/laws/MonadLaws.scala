@@ -4,8 +4,8 @@ package laws
 
 import syntax._
 
-trait MonadLaws[F[_]] extends ApplicativeLaws[F] {
-  implicit override val F: Monad[F]
+trait MonadLaws[F[_]] {
+  implicit val F: Monad[F]
 
   def monadLeftIdentity[A, B](a: A, f: A => F[B]): IsEq[F[B]] =
     F.pure(a).flatMap(f) <-> f(a)

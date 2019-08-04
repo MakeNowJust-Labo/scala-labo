@@ -2,7 +2,7 @@ package codes.quine.labo
 package neko
 package laws
 
-trait PartialOrdLaws[A] extends EqLaws[A] {
+trait PartialOrdLaws[A] {
   implicit val A: PartialOrd[A]
 
   def partialOrdReflexivity(x: A): IsEq[Boolean] =

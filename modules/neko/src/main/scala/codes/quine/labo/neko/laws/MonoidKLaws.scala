@@ -4,7 +4,7 @@ package laws
 
 import syntax._
 
-trait MonoidKLaws[F[_]] extends SemigroupKLaws[F] {
+trait MonoidKLaws[F[_]] {
   implicit val F: MonoidK[F]
 
   def monoidKLeftIdentity[A](fa: F[A]): IsEq[F[A]] =

@@ -4,8 +4,8 @@ package laws
 
 import syntax._
 
-trait ApplicativeLaws[F[_]] extends FunctorLaws[F] {
-  implicit override val F: Applicative[F]
+trait ApplicativeLaws[F[_]] {
+  implicit val F: Applicative[F]
 
   def applicativeIdentity[A](fa: F[A]): IsEq[F[A]] =
     fa <-> (F.pure((a: A) => a) <*> fa)

@@ -2,7 +2,7 @@ package codes.quine.labo
 package neko
 package laws
 
-trait HashLaws[A] extends EqLaws[A] {
+trait HashLaws[A] {
   implicit val A: Hash[A]
 
   def hashCompatibility(x: A, y: A): IsEq[Boolean] =
