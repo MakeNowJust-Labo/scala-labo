@@ -11,6 +11,7 @@ trait AllSyntax
     with Contravariant.ToContravariantOps
     with Defer.ToDeferOps
     with Eq.ToEqOps
+    with FlatMap.ToFlatMapOps
     with Functor.ToFunctorOps
     with Hash.ToHashOps
     with Monad.ToMonadOps

@@ -78,6 +78,10 @@ object NekoLaw {
   val applicativeInterchange: NekoLaw = law0(applicative, "interchange")
   val applicativeMap: NekoLaw = law0(applicative, "map")
 
+  val flatMap: NekoLaw = law("flatMap")
+  val flatMapAll: NekoLaw = all(flatMap)
+  val flatMapAssociativity: NekoLaw = law0(flatMap, "associativity")
+
   val monad: NekoLaw = law("monad")
   val monadAll: NekoLaw = all(monad)
   val monadLeftIdentity: NekoLaw = law0(monad, "left identity")
