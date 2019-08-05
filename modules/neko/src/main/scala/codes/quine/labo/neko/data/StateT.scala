@@ -40,27 +40,29 @@ private[data] trait StateTInstances0 extends StateTInstances1 {
     def tailRecM[A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] =
       StateT { s =>
         Monad[F].tailRecM[(S, A), (S, B)]((s, a)) {
-          case (s0, a0) => f(a0).run(s0).map {
-            case (s1, Left(a1)) => Left((s1, a1))
-            case (s1, Right(b)) => Right((s1, b))
-          }
+          case (s0, a0) =>
+            f(a0).run(s0).map {
+              case (s1, Left(a1)) => Left((s1, a1))
+              case (s1, Right(b)) => Right((s1, b))
+            }
         }
       }
   }
 }
 
 private[data] trait StateTInstances1 {
-  implicit def stateTAlternativeInstance[F[_]: Alternative, S](implicit F: Monad[F]): Alternative[StateT[F, S, *]] = new Alternative[StateT[F, S, *]] {
-    def pure[A](a: A): StateT[F, S, A] = StateT(s => Monad[F].pure((s, a)))
-    override def map[A, B](fa: StateT[F, S, A])(f: A => B): StateT[F, S, B] = fa.map(f)(F)
+  implicit def stateTAlternativeInstance[F[_]: Alternative, S](implicit F: Monad[F]): Alternative[StateT[F, S, *]] =
+    new Alternative[StateT[F, S, *]] {
+      def pure[A](a: A): StateT[F, S, A] = StateT(s => Monad[F].pure((s, a)))
+      override def map[A, B](fa: StateT[F, S, A])(f: A => B): StateT[F, S, B] = fa.map(f)(F)
 
-    def ap[A, B](ff: StateT[F, S, A => B])(fa: StateT[F, S, A]): StateT[F, S, B] =
-      StateT { s =>
-        F.flatMap(ff.run(s)) { case (s1, f) => F.map(fa.run(s1)) { case (s2, a) => (s2, f(a)) } }
-      }
+      def ap[A, B](ff: StateT[F, S, A => B])(fa: StateT[F, S, A]): StateT[F, S, B] =
+        StateT { s =>
+          F.flatMap(ff.run(s)) { case (s1, f) => F.map(fa.run(s1)) { case (s2, a) => (s2, f(a)) } }
+        }
 
-    def emptyK[A]: StateT[F, S, A] = StateT(s => F.map(Alternative[F].emptyK[A])((s, _)))
-    def concatK[A](x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] =
-      StateT(s => x.run(s) <+> y.run(s))
-  }
+      def emptyK[A]: StateT[F, S, A] = StateT(s => F.map(Alternative[F].emptyK[A])((s, _)))
+      def concatK[A](x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] =
+        StateT(s => x.run(s) <+> y.run(s))
+    }
 }
