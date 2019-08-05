@@ -21,33 +21,25 @@ private[instances] trait OptionInstances0 extends OptionInstances1 {
       }
   }
 
-  implicit def optionEqInstance[A: Eq]: Eq[Option[A]] = new Eq[Option[A]] {
-    def eqv(x: Option[A], y: Option[A]): Boolean =
-      (x, y) match {
-        case (None, None)                      => true
-        case (Some(x0), Some(y0)) if x0 === y0 => true
-        case _                                 => false
-      }
+  implicit def optionEqInstance[A: Eq]: Eq[Option[A]] = Eq.eqv {
+    case (None, None)                      => true
+    case (Some(x0), Some(y0)) if x0 === y0 => true
+    case _                                 => false
   }
 
-  implicit def optionPartialOrdInstance[A: PartialOrd]: PartialOrd[Option[A]] = new PartialOrd[Option[A]] {
-    def tryCmp(x: Option[A], y: Option[A]): Option[Ordering] =
-      (x, y) match {
-        case (None, None)         => Some(Ordering.EQ)
-        case (None, _)            => Some(Ordering.LT)
-        case (_, None)            => Some(Ordering.GT)
-        case (Some(x0), Some(y0)) => PartialOrd[A].tryCmp(x0, y0)
-      }
+  implicit def optionPartialOrdInstance[A: PartialOrd]: PartialOrd[Option[A]] = PartialOrd.tryCmp {
+    case (None, None)         => Some(Ordering.EQ)
+    case (None, _)            => Some(Ordering.LT)
+    case (_, None)            => Some(Ordering.GT)
+    case (Some(x0), Some(y0)) => x0.tryCmp(y0)
   }
 
-  implicit def optionOrdInstance[A: Ord]: Ord[Option[A]] = new Ord[Option[A]] {
-    def cmp(x: Option[A], y: Option[A]): Ordering =
-      (x, y) match {
-        case (None, None)         => Ordering.EQ
-        case (None, _)            => Ordering.LT
-        case (_, None)            => Ordering.GT
-        case (Some(x0), Some(y0)) => Ord[A].cmp(x0, y0)
-      }
+  implicit def optionOrdInstance[A: Ord]: Ord[Option[A]] = Ord.cmp {
+    case (None, None)         => Ordering.EQ
+    case (None, _)            => Ordering.LT
+    case (_, None)            => Ordering.GT
+    case (Some(x0), Some(y0)) => x0 <=> y0
+  }
   }
 }
 
