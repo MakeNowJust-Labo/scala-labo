@@ -11,4 +11,5 @@ class AllInstances
     with OptionInstances
     with SetInstances
     with StringInstances
+    with Tuple2Instances
     with VectorInstances

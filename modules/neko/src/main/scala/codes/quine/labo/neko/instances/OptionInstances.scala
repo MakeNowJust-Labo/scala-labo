@@ -40,6 +40,16 @@ private[instances] trait OptionInstances0 extends OptionInstances1 {
     case (_, None)            => Ordering.GT
     case (Some(x0), Some(y0)) => x0 <=> y0
   }
+
+  implicit def optionMonoidInstance[A: Semigroup]: Monoid[Option[A]] = new Monoid[Option[A]] {
+    def empty: Option[A] = None
+
+    def concat(x: Option[A], y: Option[A]): Option[A] = (x, y) match {
+      case (Some(a1), Some(a2)) => Some(a1 |+| a2)
+      case (None, Some(a))      => Some(a)
+      case (Some(a), None)      => Some(a)
+      case (None, None)         => None
+    }
   }
 }
 

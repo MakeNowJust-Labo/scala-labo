@@ -3,7 +3,7 @@ package neko
 package data
 
 import scalaprops._
-import instances._, props._, syntax._
+import instances._, props._
 
 object StateTProps extends Scalaprops {
   implicit def stateTGenInstance[F[_], S, A](implicit gf: Gen[S => F[(S, A)]]): Gen[StateT[F, S, A]] = gf.map(StateT(_))
@@ -12,11 +12,6 @@ object StateTProps extends Scalaprops {
   implicit def idCogenInstance[A](implicit ca: Cogen[A]): Cogen[Id[A]] = Cogen[A].contramap(_.value)
   implicit def evalGenInstance[A: Gen]: Gen[Eval[A]] = Gen[A].map(Eval.now(_))
   implicit def evalCogenInstance[A: Cogen]: Cogen[Eval[A]] = Cogen[A].contramap(_.value)
-
-  // TODO: add `Tuple2Instances`
-  implicit def tuple2EqInstance[A: Eq, B: Eq]: Eq[(A, B)] = Eq.eqv {
-    case ((a1, b1), (a2, b2)) => a1 === a2 && b1 === b2
-  }
 
   val `laws (Id)` = Properties.list(
     MonadProps[State[Boolean, *]].all[Int, Int, Int]
