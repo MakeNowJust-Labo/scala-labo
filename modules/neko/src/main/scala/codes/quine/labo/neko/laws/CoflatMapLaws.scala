@@ -10,6 +10,9 @@ trait CoflatMapLaws[F[_]] {
   def coflatMapAssociativity[A, B, C](fa: F[A], f: F[A] => B, g: F[B] => C): IsEq[F[C]] =
     fa.coflatMap(f).coflatMap(g) <-> fa.coflatMap(fa => g(fa.coflatMap(f)))
 
+  def coflatMapCoflattenThroughMap[A](fa: F[A]): IsEq[F[F[F[A]]]] =
+    fa.coflatten.coflatten <-> fa.coflatten.map(_.coflatten)
+
   def coflatMapCoherence[A, B](fa: F[A], f: F[A] => B): IsEq[F[B]] =
     fa.coflatMap(f) <-> fa.coflatten.map(f)
 

@@ -45,6 +45,7 @@ trait ComonadProps[F[_]] {
                    gg: Gen[F[B] => C],
                    efa: Eq[F[A]],
                    effa: Eq[F[F[A]]],
+                   efffa: Eq[F[F[F[A]]]],
                    eb: Eq[B],
                    efb: Eq[F[B]],
                    efc: Eq[F[C]]): Properties[NekoLaw] =

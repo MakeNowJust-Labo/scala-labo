@@ -93,6 +93,7 @@ object NekoLaw {
   val coflatMap: NekoLaw = law("coflatMap")
   val coflatMapAll: NekoLaw = all(coflatMap)
   val coflatMapAssociativity: NekoLaw = law0(coflatMap, "associativity")
+  val coflatMapCoflattenThroughMap: NekoLaw = law0(coflatMap, "coflatten through map")
   val coflatMapCoherence: NekoLaw = law0(coflatMap, "coherence")
   val coflatMapIdentity: NekoLaw = law0(coflatMap, "identity")
 

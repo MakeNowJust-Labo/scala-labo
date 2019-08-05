@@ -79,12 +79,19 @@ private[instances] trait ListInstances0 extends ListInstances1 {
 }
 
 private[instances] trait ListInstances1 { self: ListInstances0 =>
+  implicit def listMonoidInstance[A]: Monoid[List[A]] = listAlternativeInstance.algebra[A]
+
   implicit val listAlternativeInstance: Alternative[List] = new Alternative[List] {
     def pure[A](a: A): List[A] = List(a)
     def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] = ff.flatMap(f => fa.map(f))
     override def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
     def emptyK[A]: List[A] = List.empty
     def concatK[A](x: List[A], y: List[A]): List[A] = x ++ y
+  }
+
+  implicit val listCoflatMapInstance: CoflatMap[List] = new CoflatMap[List] {
+    def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
+    def coflatMap[A, B](fa: List[A])(f: List[A] => B): List[B] = fa.tails.toList.init.map(f)
   }
 
   implicit def listHashInstance[A: Hash]: Hash[List[A]] = new Hash[List[A]] {

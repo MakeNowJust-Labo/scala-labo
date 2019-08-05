@@ -76,12 +76,19 @@ private[instances] trait VectorInstances0 extends VectorInstances1 {
 }
 
 private[instances] trait VectorInstances1 { self: VectorInstances0 =>
+  implicit def vectorMonoidInstance[A]: Monoid[Vector[A]] = vectorAlternativeInstance.algebra[A]
+
   implicit val vectorAlternativeInstance: Alternative[Vector] = new Alternative[Vector] {
     def pure[A](a: A): Vector[A] = Vector(a)
     def ap[A, B](ff: Vector[A => B])(fa: Vector[A]): Vector[B] = ff.flatMap(f => fa.map(f))
     override def map[A, B](fa: Vector[A])(f: A => B): Vector[B] = fa.map(f)
     def emptyK[A]: Vector[A] = Vector.empty
     def concatK[A](x: Vector[A], y: Vector[A]): Vector[A] = x ++ y
+  }
+
+  implicit val vectorCoflatMapInstance: CoflatMap[Vector] = new CoflatMap[Vector] {
+    def map[A, B](fa: Vector[A])(f: A => B): Vector[B] = fa.map(f)
+    def coflatMap[A, B](fa: Vector[A])(f: Vector[A] => B): Vector[B] = fa.tails.toVector.init.map(f)
   }
 
   implicit def vectorHashInstance[A: Hash]: Hash[Vector[A]] = new Hash[Vector[A]] {

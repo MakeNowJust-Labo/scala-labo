@@ -10,6 +10,7 @@ object OptionInstancesProps extends Scalaprops {
     OrdProps[Option[Int]].all,
     HashProps[Option[Int]].all,
     MonadProps[Option].all[Int, Int, Int],
+    CoflatMapProps[Option].all[Int, Int, Int],
     AlternativeProps[Option].all[Int, Int, Int]
   )
 }

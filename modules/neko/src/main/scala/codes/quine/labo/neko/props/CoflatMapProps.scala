@@ -15,6 +15,9 @@ trait CoflatMapProps[F[_]] {
                                       efc: Eq[F[C]]): Property =
     Property.forAll(laws.coflatMapAssociativity(_: F[A], _: F[A] => B, _: F[B] => C))
 
+  def coflatMapCoflattenThroughMap[A](implicit gfa: Gen[F[A]], efffa: Eq[F[F[F[A]]]]): Property =
+    Property.forAll(laws.coflatMapCoflattenThroughMap(_: F[A]))
+
   def coflatMapCoherence[A, B](implicit gfa: Gen[F[A]], gf: Gen[F[A] => B], efb: Eq[F[B]]): Property =
     Property.forAll(laws.coflatMapCoherence(_: F[A], _: F[A] => B))
 
@@ -25,10 +28,12 @@ trait CoflatMapProps[F[_]] {
                      gf: Gen[F[A] => B],
                      gg: Gen[F[B] => C],
                      effa: Eq[F[F[A]]],
+                     efffa: Eq[F[F[F[A]]]],
                      efb: Eq[F[B]],
                      efc: Eq[F[C]]): Properties[NekoLaw] =
     Properties.properties(NekoLaw.coflatMap)(
       NekoLaw.coflatMapAssociativity -> coflatMapAssociativity[A, B, C],
+      NekoLaw.coflatMapCoflattenThroughMap -> coflatMapCoflattenThroughMap[A],
       NekoLaw.coflatMapCoherence -> coflatMapCoherence[A, B],
       NekoLaw.coflatMapIdentity -> coflatMapIdentity[A]
     )
@@ -40,6 +45,7 @@ trait CoflatMapProps[F[_]] {
                    gg: Gen[F[B] => C],
                    efa: Eq[F[A]],
                    effa: Eq[F[F[A]]],
+                   efffa: Eq[F[F[F[A]]]],
                    efb: Eq[F[B]],
                    efc: Eq[F[C]]): Properties[NekoLaw] =
     Properties.fromProps(NekoLaw.coflatMapAll, FunctorProps[F].all[A, B, C], props[A, B, C])

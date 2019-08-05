@@ -61,12 +61,15 @@ private[instances] trait OptionInstances1 { self: OptionInstances0 =>
       }
 
     def emptyK[A]: Option[A] = None
+    def concatK[A](x: Option[A], y: Option[A]): Option[A] = x.orElse(y)
+  }
 
-    def concatK[A](x: Option[A], y: Option[A]): Option[A] =
-      x match {
-        case None => y
-        case _    => x
-      }
+  implicit val optionCoflatMapInstance: CoflatMap[Option] = new CoflatMap[Option] {
+    def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
+    def coflatMap[A, B](fa: Option[A])(f: Option[A] => B): Option[B] = fa match {
+      case None    => None
+      case Some(_) => Some(f(fa))
+    }
   }
 
   implicit def optionHashInstance[A: Hash]: Hash[Option[A]] = new Hash[Option[A]] {
