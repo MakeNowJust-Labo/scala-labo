@@ -1,48 +1,39 @@
 package codes.quine.labo
 package neko
 
-import syntax._
-
 package object data {
   type ~>[F[_], G[_]] = FunctionK[F, G]
 
-  type Reader[E, A] = ReaderT[E, Id, A]
+  type Cont[R, A] = ContT[Eval, R, A]
+
+  object Cont {
+    def now[R, A](a: A): Cont[R, A] = ContT.now(a)
+    def always[R, A](a: => A): Cont[R, A] = ContT.always(a)
+    def defer[R, A](fa: => Cont[R, A]): Cont[R, A] = ContT.defer(fa)
+
+    def callCC[R, A](run: (A => Eval[R]) => Eval[R]): Cont[R, A] = ContT.callCC(run)
+  }
+
+  type Reader[E, A] = ReaderT[Id, E, A]
 
   object Reader {
-    def apply[E, A](run: E => A): ReaderT[E, Id, A] = ReaderT(e => Id(run(e)))
+    def run[E, A](fa: Reader[E, A])(e: E): A = ReaderT.run(fa)(e).value
+    def apply[E, A](run: E => A): ReaderT[Id, E, A] = ReaderT(e => Id(run(e)))
 
-    def ask[E]: Reader[E, E] = ReaderT.ask[E, Id]
+    def ask[E]: Reader[E, E] = ReaderT.ask[Id, E]
+    def local[E, A](f: E => E)(fa: Reader[E, A]): Reader[E, A] = ReaderT.local(f)(fa)
   }
 
-  type State[S, A] = StateT[S, Id, A]
+  type State[S, A] = StateT[Id, S, A]
 
   object State {
+    def run[S, A](fa: State[S, A])(s: S): (S, A) = StateT.run(fa)(s).value
+    def exec[S, A](fa: State[S, A])(s: S): S = run(fa)(s)._1
+    def eval[S, A](fa: State[S, A])(s: S): A = run(fa)(s)._2
     def apply[S, A](run: S => (S, A)): State[S, A] = StateT(s => Id(run(s)))
 
-    def read[S]: State[S, S] = StateT.read[S, Id]
-
-    def write[S](s: S): State[S, Unit] = StateT.write[S, Id](s)
-  }
-
-  type Kleisli[M[_], A, B] = ReaderT[A, M, B]
-
-  object Kleisli {
-    def apply[M[_], A, B](f: A => M[B]): Kleisli[M, A, B] = ReaderT(f)
-
-    def lift[M[_], A, B](f: A => B)(implicit M: Monad[M]): Kleisli[M, A, B] = Kleisli(x => M.pure(f(x)))
-  }
-
-  implicit def KleisliInstances[M[_]](implicit M: Monad[M]): Arrow[Kleisli[M, ?, ?]] = new Arrow[Kleisli[M, ?, ?]] {
-    def id[A]: Kleisli[M, A, A] = Kleisli(M.pure)
-
-    def compose[A, B, C](f: Kleisli[M, B, C])(g: Kleisli[M, A, B]): Kleisli[M, A, C] = f.compose(g)
-
-    override def andThen[A, B, C](f: Kleisli[M, A, B])(g: Kleisli[M, B, C]): Kleisli[M, A, C] = f.andThen(g)
-
-    def lift[A, B](f: A => B): Kleisli[M, A, B] = Kleisli.lift(f)
-
-    def first[A, B, C](f: Kleisli[M, A, B]): Kleisli[M, (A, C), (B, C)] = Kleisli {
-      case (a, c) => f.run(a).map((_, c))
-    }
+    def get[S]: State[S, S] = StateT.get[Id, S]
+    def put[S](s: S): State[S, Unit] = StateT.put(s)
+    def modify[S](f: S => S): State[S, Unit] = StateT.modify(f)
   }
 }
