@@ -22,7 +22,7 @@ object Operational {
 
     def tailRecM[A, B](a: A)(f: A => Operational[F, Either[A, B]]): Operational[F, B] =
       f(a).flatMap {
-        case Left(a) => tailRecM(a)(f)
+        case Left(a)  => tailRecM(a)(f)
         case Right(b) => pure(b)
       }
   }

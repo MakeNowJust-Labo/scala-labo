@@ -35,7 +35,7 @@ object Free {
 
     def tailRecM[A, B](a: A)(f: A => Free[F, Either[A, B]]): Free[F, B] =
       f(a).flatMap {
-        case Left(a) => tailRecM(a)(f)
+        case Left(a)  => tailRecM(a)(f)
         case Right(b) => pure(b)
       }
   }
