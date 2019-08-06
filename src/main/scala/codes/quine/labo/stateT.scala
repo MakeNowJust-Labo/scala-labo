@@ -4,17 +4,17 @@ object nekoStateT {
   import neko._, data._, instances._, syntax._
 
   val fa = StateT[Option, Boolean, Boolean] {
-    case true => None
+    case true  => None
     case false => Some((true, false))
   }
 
   val ff = StateT[Option, Boolean, Boolean => Boolean] {
-    case true => Some((true, x => !x))
+    case true  => Some((true, x => !x))
     case false => Some((true, x => x))
   }
 
   val fg = StateT[Option, Boolean, Boolean => Boolean] {
-    case true => Some((false, x => !x))
+    case true  => Some((false, x => !x))
     case false => Some((true, x => !x))
   }
 
@@ -38,17 +38,17 @@ object catsStateT {
   import cats._, data._, implicits._
 
   val fa = StateT[Option, Boolean, Boolean] {
-    case true => None
+    case true  => None
     case false => Some((true, false))
   }
 
   val ff = StateT[Option, Boolean, Boolean => Boolean] {
-    case true => Some((true, x => !x))
+    case true  => Some((true, x => !x))
     case false => Some((true, x => x))
   }
 
   val fg = StateT[Option, Boolean, Boolean => Boolean] {
-    case true => Some((false, x => !x))
+    case true  => Some((false, x => !x))
     case false => Some((true, x => !x))
   }
 
