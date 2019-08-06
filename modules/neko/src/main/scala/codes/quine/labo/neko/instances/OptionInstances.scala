@@ -57,10 +57,7 @@ private[instances] trait OptionInstances1 { self: OptionInstances0 =>
   implicit val optionAlternativeInstance: Alternative[Option] = new Alternative[Option] {
     def pure[A](a: A): Option[A] = Some(a)
     def ap[A, B](ff: Option[A => B])(fa: Option[A]): Option[B] =
-      ff match {
-        case Some(f) => fa.map(f)
-        case None    => None
-      }
+      ff.flatMap(f => fa.map(f))
 
     def emptyK[A]: Option[A] = None
     def concatK[A](x: Option[A], y: Option[A]): Option[A] = x.orElse(y)

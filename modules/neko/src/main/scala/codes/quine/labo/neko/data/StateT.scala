@@ -57,11 +57,9 @@ private[data] trait StateTInstances1 {
       override def map[A, B](fa: StateT[F, S, A])(f: A => B): StateT[F, S, B] = fa.map(f)(F)
 
       def ap[A, B](ff: StateT[F, S, A => B])(fa: StateT[F, S, A]): StateT[F, S, B] =
-        StateT { s =>
-          F.flatMap(ff.run(s)) { case (s1, f) => F.map(fa.run(s1)) { case (s2, a) => (s2, f(a)) } }
-        }
+        ff.flatMap(f => fa.map(f)(F))
 
-      def emptyK[A]: StateT[F, S, A] = StateT(s => F.map(Alternative[F].emptyK[A])((s, _)))
+      def emptyK[A]: StateT[F, S, A] = StateT(_ => Alternative[F].emptyK)
       def concatK[A](x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] =
         StateT(s => x.run(s) <+> y.run(s))
     }
