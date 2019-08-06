@@ -17,7 +17,13 @@ object Operational {
   implicit def OperationalMonad[F[_]]: Monad[Operational[F, ?]] = new Monad[Operational[F, ?]] {
     def pure[A](a: A): Operational[F, A] = Operational(Pure(a))
 
-    def flatMap[A, B](fa: Operational[F, A])(f: A => Operational[F, B]): Operational[F, B] =
+    override def flatMap[A, B](fa: Operational[F, A])(f: A => Operational[F, B]): Operational[F, B] =
       Operational(fa.free.flatMap(a => f(a).free))
+
+    def tailRecM[A, B](a: A)(f: A => Operational[F, Either[A, B]]): Operational[F, B] =
+      f(a).flatMap {
+        case Left(a) => tailRecM(a)(f)
+        case Right(b) => pure(b)
+      }
   }
 }

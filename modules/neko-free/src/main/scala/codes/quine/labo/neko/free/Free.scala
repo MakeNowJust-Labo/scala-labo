@@ -27,10 +27,16 @@ object Free {
   implicit def FreeMonad[F[_]](implicit F: Functor[F]): Monad[Free[F, ?]] = new Monad[Free[F, ?]] {
     def pure[A](a: A): Free[F, A] = Pure(a)
 
-    def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] =
+    override def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] =
       fa match {
         case Pure(a)      => f(a)
         case Flatten(ffa) => Flatten(F.map(ffa)((fa: Free[F, A]) => flatMap(fa)(f)))
+      }
+
+    def tailRecM[A, B](a: A)(f: A => Free[F, Either[A, B]]): Free[F, B] =
+      f(a).flatMap {
+        case Left(a) => tailRecM(a)(f)
+        case Right(b) => pure(b)
       }
   }
 }

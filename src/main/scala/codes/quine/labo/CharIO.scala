@@ -33,13 +33,13 @@ object CharIO {
           fb match {
             case CharRead =>
               for {
-                (i, o) <- State.read[(String, String)]
-                _ <- State.write((i.tail, o))
+                (i, o) <- State.get[(String, String)]
+                _ <- State.put((i.tail, o))
               } yield i.headOption.getOrElse('\u0000')
             case CharWrite(c) =>
               for {
-                (i, o) <- State.read[(String, String)]
-                _ <- State.write((i, o + c))
+                (i, o) <- State.get[(String, String)]
+                _ <- State.put((i, o + c))
               } yield ()
           }
       })

@@ -23,6 +23,6 @@ object StateTProps extends Scalaprops {
 
   val `laws (List)` = Properties.list(
     MonadProps[StateT[List, Boolean, *]].all[Int, Int, Int],
-    AlternativeProps[StateT[List, Boolean, *]].all[Int, Int, Int]
+    AlternativeProps[StateT[List, Boolean, *]].all[Boolean, Boolean, Boolean]
   )
 }
