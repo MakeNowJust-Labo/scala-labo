@@ -13,7 +13,7 @@ final case class ContT[F[_], R, A](run: (A => F[R]) => F[R]) {
 object ContT extends ContTInstances0 {
   def now[F[_], R, A](a: A): ContT[F, R, A] = ContT(k => k(a))
   def always[F[_], R, A](a: => A): ContT[F, R, A] = ContT(k => k(a))
-  def defer[F[_], R, A](fa: => ContT[F, R, A]): ContT[F, R, A] = ContT(k => fa.run(k))
+  def defer[F[_]: Defer, R, A](fa: => ContT[F, R, A]): ContT[F, R, A] = ContT(k => Defer[F].defer(fa.run(k)))
 
   def callCC[F[_], R, A](run: (A => F[R]) => F[R]): ContT[F, R, A] = ContT(run)
 }
@@ -39,7 +39,7 @@ private[data] trait ContTInstances0 {
       }
   }
 
-  implicit def contTDeferInstane[F[_], R]: Defer[ContT[F, R, *]] = new Defer[ContT[F, R, *]] {
+  implicit def contTDeferInstane[F[_]: Defer, R]: Defer[ContT[F, R, *]] = new Defer[ContT[F, R, *]] {
     def defer[A](fa: => ContT[F, R, A]): ContT[F, R, A] = ContT.defer(fa)
   }
 }
