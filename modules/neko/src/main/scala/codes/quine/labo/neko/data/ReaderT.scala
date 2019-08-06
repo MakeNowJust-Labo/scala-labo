@@ -18,7 +18,7 @@ object ReaderT extends ReaderTInstances0 {
   def local[F[_], E, A](f: E => E)(fa: ReaderT[F, E, A]): ReaderT[F, E, A] =
     ReaderT(e => fa.run(f(e)))
 
-  def tailRecM[F[_]: FlatMap, E, A, B](a: A)(f: A => ReaderT[F, E, Either[A, B]]): ReaderT[F, E, B] =
+  private[data] def tailRecM[F[_]: FlatMap, E, A, B](a: A)(f: A => ReaderT[F, E, Either[A, B]]): ReaderT[F, E, B] =
     ReaderT(e => FlatMap[F].tailRecM(a)(f(_).run(e)))
 }
 
