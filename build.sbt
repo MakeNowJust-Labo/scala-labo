@@ -24,6 +24,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "labo",
+    libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0-M4",
     commonSettings
   )
   .dependsOn(neko, free)
