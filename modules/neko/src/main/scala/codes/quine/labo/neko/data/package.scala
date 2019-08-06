@@ -24,6 +24,16 @@ package object data {
     def local[E, A](f: E => E)(fa: Reader[E, A]): Reader[E, A] = ReaderT.local(f)(fa)
   }
 
+  type Writer[L, A] = WriterT[Id, L, A]
+
+  object Writer {
+    def run[L, A](fa: Writer[L, A]): (L, A) = fa.run.value
+    def apply[L, A](run: (L, A)): Writer[L, A] = WriterT(Id(run))
+
+    def tell[L](l: L): Writer[L, Unit] = WriterT.tell(l)
+    def listen[L, A](fa: Writer[L, A]): Writer[L, (L, A)] = WriterT.listen(fa)
+  }
+
   type State[S, A] = StateT[Id, S, A]
 
   object State {
