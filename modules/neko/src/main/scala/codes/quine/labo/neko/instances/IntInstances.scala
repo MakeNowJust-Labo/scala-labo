@@ -22,4 +22,14 @@ private[instances] trait IntInstances1 {
   }
 }
 
-package object int extends IntInstances
+package object int extends IntInstances {
+  def sumMonoidInstance: Monoid[Int] = new Monoid[Int] {
+    def empty: Int = 0
+    def concat(x: Int, y: Int): Int = x + y
+  }
+
+  def productMonoidInstance: Monoid[Int] = new Monoid[Int] {
+    def empty: Int = 1
+    def concat(x: Int, y: Int): Int = x * y
+  }
+}

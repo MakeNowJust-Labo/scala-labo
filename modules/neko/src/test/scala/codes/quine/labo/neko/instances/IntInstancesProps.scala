@@ -10,4 +10,18 @@ object IntInstancesProps extends Scalaprops {
     OrdProps[Int].all,
     HashProps[Int].all
   )
+
+  val `laws (sum)` = {
+    implicit val intMonoidInstance: Monoid[Int] = int.sumMonoidInstance
+    Properties.list(
+      MonoidProps[Int].all
+    )
+  }
+
+  val `laws (product)` = {
+    implicit val intMonoidInstance: Monoid[Int] = int.productMonoidInstance
+    Properties.list(
+      MonoidProps[Int].all
+    )
+  }
 }

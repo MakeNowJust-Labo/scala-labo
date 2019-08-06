@@ -10,4 +10,18 @@ object BooleanInstancesProps extends Scalaprops {
     OrdProps[Boolean].all,
     HashProps[Boolean].all
   )
+
+  val `laws (all)` = {
+    implicit val booleanMonoidInstance: Monoid[Boolean] = boolean.allMonoidInstance
+    Properties.list(
+      MonoidProps[Boolean].all
+    )
+  }
+
+  val `laws (any)` = {
+    implicit val booleanMonoidInstance: Monoid[Boolean] = boolean.anyMonoidInstance
+    Properties.list(
+      MonoidProps[Boolean].all
+    )
+  }
 }

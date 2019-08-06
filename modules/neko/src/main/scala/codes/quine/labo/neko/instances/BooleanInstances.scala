@@ -20,4 +20,14 @@ private[instances] trait BooleanInstances1 {
   }
 }
 
-package object boolean extends BooleanInstances
+package object boolean extends BooleanInstances {
+  def allMonoidInstance: Monoid[Boolean] = new Monoid[Boolean] {
+    def empty: Boolean = true
+    def concat(x: Boolean, y: Boolean): Boolean = x && y
+  }
+
+  def anyMonoidInstance: Monoid[Boolean] = new Monoid[Boolean] {
+    def empty: Boolean = false
+    def concat(x: Boolean, y: Boolean): Boolean = x || y
+  }
+}
