@@ -8,6 +8,13 @@ import syntax._
 trait MapInstances extends MapInstances0
 
 private[instances] trait MapInstances0 {
+  implicit val mapComposeInstance: Compose[Map] = new Compose[Map] {
+    def compose[A, B, C](f: Map[B, C], g: Map[A, B]): Map[A, C] = g.flatMap { case (a, b) => f.get(b).map((a, _)) }
+    override def andThen[A, B, C](f: Map[A, B], g: Map[B, C]): Map[A, C] = f.flatMap {
+      case (a, b) => g.get(b).map((a, _))
+    }
+  }
+
   implicit def mapFlatMapInstance[K]: FlatMap[Map[K, *]] = new FlatMap[Map[K, *]] {
     def map[A, B](fa: Map[K, A])(f: A => B): Map[K, B] = fa.map { case (k, a) => (k, f(a)) }
     override def flatMap[A, B](fa: Map[K, A])(f: A => Map[K, B]): Map[K, B] =

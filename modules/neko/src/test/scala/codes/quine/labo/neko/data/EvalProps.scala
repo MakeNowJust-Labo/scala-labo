@@ -16,7 +16,7 @@ object EvalProps extends Scalaprops {
       OrdProps[Eval[Int]].all,
       HashProps[Eval[Int]].all,
       MonoidProps[Eval[String]].all,
-      MonadProps[Eval].all[Int, Int, Int],
+      BimonadProps[Eval].all[Int, Int, Int],
       DeferProps[Eval].all[Int]
     )
 }

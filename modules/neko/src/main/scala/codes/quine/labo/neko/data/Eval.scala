@@ -176,7 +176,7 @@ object Eval extends EvalInstances0 {
 }
 
 private[data] trait EvalInstances0 extends EvalInstances1 {
-  implicit val evalMonadInstance: Monad[Eval] = new Monad[Eval] {
+  implicit val evalBimonadInstance: Bimonad[Eval] = new Bimonad[Eval] {
     def pure[A](a: A): Eval[A] = Eval.now(a)
     override def flatMap[A, B](fa: Eval[A])(f: A => Eval[B]): Eval[B] = fa.flatMap(f)
     override def map[A, B](fa: Eval[A])(f: A => B): Eval[B] = fa.map(f)
@@ -185,6 +185,8 @@ private[data] trait EvalInstances0 extends EvalInstances1 {
         case Left(a1) => tailRecM(a1)(f)
         case Right(b) => pure(b)
       }
+    def extract[A](fa: Eval[A]): A = fa.value
+    def coflatMap[A, B](fa: Eval[A])(f: Eval[A] => B): Eval[B] = Eval.later(f(fa))
   }
 
   implicit val evalDeferInstance: Defer[Eval] = new Defer[Eval] {
@@ -206,11 +208,6 @@ private[data] trait EvalInstances0 extends EvalInstances1 {
 }
 
 private[data] trait EvalInstances1 {
-  implicit val evalComonadInstance: Comonad[Eval] = new Comonad[Eval] {
-    def extract[A](fa: Eval[A]): A = fa.value
-    def coflatMap[A, B](fa: Eval[A])(f: Eval[A] => B): Eval[B] = Eval.later(f(fa))
-  }
-
   implicit def evalHashInstance[A: Hash]: Hash[Eval[A]] = new Hash[Eval[A]] {
     def eqv(x: Eval[A], y: Eval[A]): Boolean = x.value === y.value
     def hash(x: Eval[A]): Int = x.value.hash

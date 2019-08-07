@@ -10,6 +10,7 @@ trait AllSyntax
     with Category.ToCategoryOps
     with CoflatMap.ToCoflatMapOps
     with Comonad.ToComonadOps
+    with Compose.ToComposeOps
     with Contravariant.ToContravariantOps
     with Defer.ToDeferOps
     with Eq.ToEqOps
@@ -21,7 +22,9 @@ trait AllSyntax
     with MonoidK.ToMonoidKOps
     with Ord.ToOrdOps
     with PartialOrd.ToPartialOrdOps
+    with Profunctor.ToProfunctorOps
     with Semigroup.ToSemigroupOps
     with SemigroupK.ToSemigroupKOps
+    with Strong.ToStrongOps
 
 object syntax extends AllSyntax
