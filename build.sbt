@@ -27,7 +27,9 @@ lazy val root = project
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0-M4",
     scalapropsSettings,
     scalapropsVersion := "0.6.0",
-    commonSettings
+    commonSettings,
+    addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.4.3" cross CrossVersion.full),
+    libraryDependencies += "com.github.ghik" % "silencer-lib" % "1.4.3" % Provided cross CrossVersion.full
   )
   .dependsOn(neko, free)
   .aggregate(neko, free)
