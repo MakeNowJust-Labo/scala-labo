@@ -40,7 +40,7 @@ object PartialFun {
     def apply[A, B]: Empty[A, B] = instance.asInstanceOf[Empty[A, B]]
   }
 
-  final class Point[B] private (private var b0: () => B) extends PartialFun[Unit, B] {
+  final class Point[B] private (private[this] var b0: () => B) extends PartialFun[Unit, B] {
     lazy val b: B = {
       val x = b0()
       b0 = null
