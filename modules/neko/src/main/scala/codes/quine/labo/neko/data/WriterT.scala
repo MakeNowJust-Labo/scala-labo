@@ -39,9 +39,9 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
   implicit def writerTOrdInstance[F[_], L, A](implicit FLA: Ord[F[(L, A)]]): Ord[WriterT[F, L, A]] = FLA.by(_.run)
 
   implicit def writerTSemigroupInstance[F[_], L, A](implicit FLA: Semigroup[F[(L, A)]]): Semigroup[WriterT[F, L, A]] =
-    FLA.by(WriterT(_))(_.run)
+    FLA.by(_.run, WriterT(_))
   implicit def writerTMonoidInstance[F[_], L, A](implicit FLA: Monoid[F[(L, A)]]): Monoid[WriterT[F, L, A]] =
-    FLA.by(WriterT(_))(_.run)
+    FLA.by(_.run, WriterT(_))
 
   implicit def writerTFunctorInstance[F[_]: Functor, L]: Functor[WriterT[F, L, *]] = new Functor[WriterT[F, L, *]] {
     def map[A, B](fa: WriterT[F, L, A])(f: A => B): WriterT[F, L, B] = fa.map(f)

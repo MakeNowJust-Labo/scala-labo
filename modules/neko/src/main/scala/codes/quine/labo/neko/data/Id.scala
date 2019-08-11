@@ -35,8 +35,8 @@ private[data] trait IdInstances0 extends IdInstances1 {
   implicit def idPartialOrdInstance[A: PartialOrd]: PartialOrd[Id[A]] = PartialOrd[A].by(_.value)
   implicit def idOrdInstance[A: Ord]: Ord[Id[A]] = Ord[A].by(_.value)
 
-  implicit def idSemigroupInstance[A: Semigroup]: Semigroup[Id[A]] = Semigroup[A].by(Id(_))(_.value)
-  implicit def idMonoidInstance[A: Monoid]: Monoid[Id[A]] = Monoid[A].by(Id(_))(_.value)
+  implicit def idSemigroupInstance[A: Semigroup]: Semigroup[Id[A]] = Semigroup[A].by(_.value, Id(_))
+  implicit def idMonoidInstance[A: Monoid]: Monoid[Id[A]] = Monoid[A].by(_.value, Id(_))
 }
 
 private[data] trait IdInstances1 {

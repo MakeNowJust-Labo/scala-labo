@@ -167,7 +167,7 @@ object PartialFun {
   def build[B](f: A => B): PartialFun[A, B]
 
   @simulacrum.noop
-  def with[X](embed: X => A, eject: A => X): PartialFunArg[X] = new PartialFunArg[X] {
+  def by[X](embed: X => A, eject: A => X): PartialFunArg[X] = new PartialFunArg[X] {
     def build[B](f: X => B): PartialFun[X, B] =
       Iso.build(embed, eject, f)(self)
   }
@@ -199,7 +199,7 @@ object PartialFunArg {
     def embed(x: Boolean): R = if (x) Right(()) else Left(())
     def eject(y: R): Boolean = y.fold(_ => false, _ => true)
 
-    R.with(embed, eject)
+    R.by(embed, eject)
   }
 
   implicit def list[A](implicit A: PartialFunArg[A]): PartialFunArg[List[A]] = new PartialFunArg[List[A]] { listA =>
@@ -239,9 +239,9 @@ object PartialFunArg {
       Iso.build(embed, eject, f)
   }
 
-  implicit val char: PartialFunArg[Char] = int.imap(_.toInt, _.toChar)
-  implicit def array[A: PartialFunArg: ClassTag]: PartialFunArg[Array[A]] = list[A].imap(_.toList, _.toArray)
-  implicit val string: PartialFunArg[String] = array[Char].imap(_.toCharArray, String.valueOf(_))
+  implicit val char: PartialFunArg[Char] = int.by(_.toInt, _.toChar)
+  implicit def array[A: PartialFunArg: ClassTag]: PartialFunArg[Array[A]] = list[A].by(_.toList, _.toArray)
+  implicit val string: PartialFunArg[String] = array[Char].by(_.toCharArray, String.valueOf(_))
 }
 
 final case class Fun[A, B](ab: PartialFun[A, B], d: B, isShrunk: Boolean, f: A => B) {

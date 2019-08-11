@@ -7,8 +7,8 @@ import simulacrum.typeclass
   def empty: A
 
   @simulacrum.noop
-  override def by[B](to: A => B)(from: B => A): Monoid[B] = new Monoid[B] {
-    def empty: B = to(self.empty)
-    def concat(x: B, y: B): B = to(self.concat(from(x), from(y)))
+  override def by[B](embed: B => A, eject: A => B): Monoid[B] = new Monoid[B] {
+    def empty: B = eject(self.empty)
+    def concat(x: B, y: B): B = eject(self.concat(embed(x), embed(y)))
   }
 }
