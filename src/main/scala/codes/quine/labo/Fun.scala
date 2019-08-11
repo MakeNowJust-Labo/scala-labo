@@ -257,14 +257,17 @@ final case class Fun[A, B](ab: PartialFun[A, B], d: B, isShrunk: Boolean, f: A =
 object Fun {
   def from[A, B](abs: (A, B)*)(d: B): Fun[A, B] = ???
 
-  implicit def scalapropsGenInstance[A: Cogen: PartialFunArg, B: Gen]: Gen[Fun[A, B]] =
-    Gen[(A => B, B)].map { case (f, d) => Fun(PartialFun(f), d, false, f) }
-  @silent implicit def scalapropsShrinkInstance[A, B](implicit s: Shrink[B]): Shrink[Fun[A, B]] =
-    Shrink.shrink { case fun @ Fun(ab, d, isShrunk, f) =>
-      ab.shrink(b => LazyList.from(s(b))).map(ab1 => Fun(ab1, d, false, ab1.toFunction(d))).toStream #:::
-        s(d).map(d1 => new Fun(ab, d1, false, ab.toFunction(d1))) #:::
-        (if (isShrunk) Stream.empty else Stream(fun.copy(isShrunk = true)))
+  def gen[A: Cogen: PartialFunArg, B: Gen](isShrunk: Boolean): Gen[Fun[A, B]] =
+    Gen[(A => B, B)].map { case (f, d) => Fun(PartialFun(f), d, isShrunk, f) }
+  @silent def shrink[A, B](isShrunk: Boolean)(implicit s: Shrink[B]): Shrink[Fun[A, B]] =
+    Shrink.shrink { case fun @ Fun(ab, d, shrunk, f) =>
+      ab.shrink(b => LazyList.from(s(b))).map(ab1 => Fun(ab1, d, isShrunk, ab1.toFunction(d))).toStream #:::
+        s(d).map(d1 => new Fun(ab, d1, isShrunk, ab.toFunction(d1))) #:::
+        (if (shrunk) Stream.empty else Stream(fun.copy(isShrunk = true)))
     }
+
+  implicit def scalapropsGenInstance[A: Cogen: PartialFunArg, B: Gen]: Gen[Fun[A, B]] = gen(false)
+  implicit def scalapropsShrinkInstance[A, B](implicit s: Shrink[B]): Shrink[Fun[A, B]] = shrink(false)
 }
 
 package object fun {
