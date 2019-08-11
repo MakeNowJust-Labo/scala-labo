@@ -167,7 +167,7 @@ object PartialFun {
   def build[B](f: A => B): PartialFun[A, B]
 
   @simulacrum.noop
-  def imap[X](embed: X => A, eject: A => X): PartialFunArg[X] = new PartialFunArg[X] {
+  def with[X](embed: X => A, eject: A => X): PartialFunArg[X] = new PartialFunArg[X] {
     def build[B](f: X => B): PartialFun[X, B] =
       Iso.build(embed, eject, f)(self)
   }
@@ -199,7 +199,7 @@ object PartialFunArg {
     def embed(x: Boolean): R = if (x) Right(()) else Left(())
     def eject(y: R): Boolean = y.fold(_ => false, _ => true)
 
-    R.imap(embed, eject)
+    R.with(embed, eject)
   }
 
   implicit def list[A](implicit A: PartialFunArg[A]): PartialFunArg[List[A]] = new PartialFunArg[List[A]] { listA =>
