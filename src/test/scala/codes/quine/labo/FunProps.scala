@@ -15,6 +15,10 @@ object FunProps extends Scalaprops {
       xs.foldRight(z)(Function.untupled(f)) == xs.foldLeft(z)(Function.untupled(f))
   }
 
+  val byte = Property.forAllS[Fun[(Byte, List[Byte]), Int]] {
+    case Fun(_, _, _, f) => f((1, List(127, 2))) == f((127, List(2))) && f((127, List(2))) == f((127, List(1, 2, 3)))
+  }
+
   val stateT = {
     implicit def stateTEqInstance[F[_], S, A](implicit ef: Eq[S => F[(S, A)]]): Eq[StateT[F, S, A]] = ef.by(_.run)
     implicit def stateTAlternativeInstance[F[_]: FlatMap: Alternative, S]: Alternative[StateT[F, S, *]] =

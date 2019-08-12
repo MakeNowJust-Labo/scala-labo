@@ -1,9 +1,11 @@
 package codes.quine.labo
 
 import com.github.ghik.silencer.silent
+import java.nio.ByteBuffer
 import scalaprops.{Cogen, Gen, Shrink}
-import simulacrum.typeclass
 import scala.reflect.ClassTag
+import scala.util.chaining._
+import simulacrum.typeclass
 
 sealed abstract class PartialFun[A, B] {
   def isEmpty: Boolean
@@ -24,6 +26,8 @@ object PartialFun {
     if (ac.isEmpty && bc.isEmpty) Empty[Either[A, B], C] else Choice(ac, bc)
   def iso[A, B, C](embed: A => B, eject: B => A, bc: PartialFun[B, C]): PartialFun[A, C] =
     if (bc.isEmpty) Empty[A, C] else Iso(embed, eject, bc)
+  def lift[A, B](domain: Set[A], f: A => B): PartialFun[A, B] =
+    if (domain.isEmpty) Empty[A, B] else Lift(domain, f)
 
   final class Empty[A, B] private () extends PartialFun[A, B] {
     def isEmpty: Boolean = true
@@ -111,7 +115,7 @@ object PartialFun {
     def shrink(s: C => LazyList[C]): LazyList[PartialFun[A, C]] =
       bc.value.shrink(s).map(iso(embed, eject, _))
 
-    override def toString: String = s"Iso(<embed>, <eject>, $bc)"
+    override def toString: String = s"Iso($embed, $eject, $bc)"
   }
 
   object Iso {
@@ -120,6 +124,27 @@ object PartialFun {
 
     def build[A, B, C](embed: A => B, eject: B => A, f: A => C)(implicit B: PartialFunArg[B]): Iso[A, B, C] =
       Iso(embed, eject, B.build(b => f(eject(b))))
+  }
+
+  final class Lift[A, B] private (val domain: Set[A], val f: A => B) extends PartialFun[A, B] {
+    def isEmpty: Boolean = false
+    def map[C](g: B => C): PartialFun[A, C] = Lift(domain, f.andThen(g))
+    def table: LazyList[(A, B)] = LazyList.from(domain).map(a => (a, f(a)))
+    def toFunction(d: B): A => B =
+      (a: A) => if (domain.contains(a)) f(a) else d
+    def shrink(s: B => LazyList[B]): LazyList[PartialFun[A, B]] = {
+      val dom = domain.toList
+      LazyList.from(Shrink.list(Shrink.empty)(dom).map(dom1 => lift(dom1.toSet, f))) #:::
+        LazyList.from(dom).map(a => (a, f(a))).flatMap {
+          case (a, b) => s(b).map(b1 => lift(domain, Map(a -> b1).withDefault(f)))
+        }
+    }
+
+    override def toString: String = s"Lift($domain, $f)"
+  }
+
+  object Lift {
+    def apply[A, B](domain: Set[A], f: A => B): Lift[A, B] = new Lift(domain, f)
   }
 }
 
@@ -148,11 +173,16 @@ object PartialFunArg {
         Choice(A.build(a => f(Left(a))), B.build(b => f(Right(b))))
     }
 
-  implicit def pair[A, B](implicit A: PartialFunArg[A], B: PartialFunArg[B]): PartialFunArg[(A, B)] =
+  implicit def tuple2[A, B](implicit A: PartialFunArg[A], B: PartialFunArg[B]): PartialFunArg[(A, B)] =
     new PartialFunArg[(A, B)] {
       def build[C](f: ((A, B)) => C): PartialFun[(A, B), C] =
         Uncurry(A.build(a => B.build(b => f((a, b)))))
     }
+  implicit def tuple3[A: PartialFunArg, B: PartialFunArg, C: PartialFunArg]: PartialFunArg[(A, B, C)] =
+    PartialFunArg[(A, (B, C))].by({ case (a, b, c) => (a, (b, c)) }, { case (a, (b, c)) => (a, b, c) })
+  implicit def tuple4[A: PartialFunArg, B: PartialFunArg, C: PartialFunArg, D: PartialFunArg]
+    : PartialFunArg[(A, B, C, D)] =
+    PartialFunArg[(A, B, (C, D))].by({ case (a, b, c, d) => (a, b, (c, d)) }, { case (a, b, (c, d)) => (a, b, c, d) })
 
   implicit def boolean: PartialFunArg[Boolean] = {
     type R = Either[Unit, Unit]
@@ -166,7 +196,7 @@ object PartialFunArg {
 
   implicit def list[A](implicit A: PartialFunArg[A]): PartialFunArg[List[A]] = new PartialFunArg[List[A]] { listA =>
     type R = Either[Unit, (A, List[A])]
-    implicit val R: PartialFunArg[R] = either(unit, pair(A, listA))
+    implicit val R: PartialFunArg[R] = either(unit, tuple2(A, listA))
 
     def embed(x: List[A]): R = x match {
       case Nil     => Left(())
@@ -181,24 +211,22 @@ object PartialFunArg {
       Iso.build(embed, eject, f)
   }
 
-  implicit val int: PartialFunArg[Int] = new PartialFunArg[Int] { int =>
-    type R = Either[(Boolean, Int), Boolean]
-    implicit val R: PartialFunArg[R] = either(pair(boolean, int), boolean)
+  implicit val byte: PartialFunArg[Byte] = new PartialFunArg[Byte] { b =>
+    val domain: Set[Byte] = (-128 to 127).map(_.asInstanceOf[Byte]).toSet
+    def build[B](f: Byte => B): PartialFun[Byte, B] =
+      Lift(domain, f)
+  }
 
-    def embed(x: Int): R = x match {
-      case 0  => Right(false)
-      case -1 => Right(true)
-      case _  => Left((x % 2 != 0, x / 2))
-    }
-    def eject(y: R): Int = y match {
-      case Right(false)     => 0
-      case Right(true)      => -1
-      case Left((true, x))  => 2 * x + 1
-      case Left((false, x)) => 2 * x
-    }
+  implicit val int: PartialFunArg[Int] = {
+    type R = (Byte, Byte, Byte, Byte)
 
-    def build[B](f: Int => B): PartialFun[Int, B] =
-      Iso.build(embed, eject, f)
+    def embed(x: Int): R =
+      ByteBuffer.allocate(4).putInt(x).array().pipe(bb => (bb(0), bb(1), bb(2), bb(3)))
+
+    def eject(y: R): Int =
+      ByteBuffer.wrap(Array(y._1, y._2, y._3, y._4)).getInt()
+
+    PartialFunArg[R].by(embed, eject)
   }
 
   implicit val char: PartialFunArg[Char] = int.by(_.toInt, _.toChar)
@@ -217,7 +245,11 @@ final case class Fun[A, B](ab: PartialFun[A, B], d: B, isShrunk: Boolean, f: A =
 }
 
 object Fun {
-  def from[A, B](abs: (A, B)*)(d: B): Fun[A, B] = ???
+  def from[A, B](abs: (A, B)*)(d: B): Fun[A, B] = {
+    val f = abs.toMap
+    val ab = PartialFun.lift(f.keySet, f)
+    Fun(ab, d, true, f.withDefault(_ => d))
+  }
 
   def gen[A: Cogen: PartialFunArg, B: Gen](isShrunk: Boolean): Gen[Fun[A, B]] =
     Gen[(A => B, B)].map { case (f, d) => Fun(PartialFun(f), d, isShrunk, f) }
