@@ -5,7 +5,7 @@ package data
 import scala.annotation.tailrec
 import syntax._
 
-sealed trait Eval[A] {
+sealed trait Eval[+A] {
   import Eval._
 
   def value: A
@@ -21,8 +21,8 @@ sealed trait Eval[A] {
     }
 
   // It is only used for implementing `Semigroup[Eval[A]]` and `Monoid[Eval[A]]`.
-  private[data] def concat(that: Eval[A])(implicit A: Semigroup[A]): Eval[A] =
-    for { x <- this; y <- that } yield x |+| y
+  private[data] def concat[AA >: A](that: Eval[AA])(implicit AA: Semigroup[AA]): Eval[AA] =
+    for { x <- this; y <- that } yield (x: AA) |+| y
 }
 
 object Eval extends EvalInstances0 {
@@ -38,7 +38,7 @@ object Eval extends EvalInstances0 {
    *
    * @see [[http://hackage.haskell.org/package/type-aligned]]
    */
-  sealed private trait FunTree[A, B] {
+  sealed private trait FunTree[-A, +B] {
 
     /** Append a function to the last. O(1) */
     def :+[C](f: B => Eval[C]): FunTree[A, C] = FunTree.append(this, f)
@@ -61,10 +61,10 @@ object Eval extends EvalInstances0 {
     }
 
     /** A single A => Eval[B] function.  */
-    final case class Leaf[A, B](f: A => Eval[B]) extends FunTree[A, B]
+    final case class Leaf[-A, +B](f: A => Eval[B]) extends FunTree[A, B]
 
     /** A => Eval[B] and B => Eval[C] functions composition. */
-    final case class Node[A, B, C](l: FunTree[A, B], r: FunTree[B, C]) extends FunTree[A, C]
+    final case class Node[-A, B, +C](l: FunTree[A, B], r: FunTree[B, C]) extends FunTree[A, C]
 
     def lift[A, B](f: A => Eval[B]): FunTree[A, B] = Leaf(f)
     def empty[A]: FunTree[A, A] = Empty[A]
@@ -80,7 +80,7 @@ object Eval extends EvalInstances0 {
   }
 
   /** [[FunTree]] view. */
-  sealed private trait FunList[A, B]
+  sealed private trait FunList[-A, +B]
 
   private object FunList {
     import FunTree._
@@ -92,16 +92,16 @@ object Eval extends EvalInstances0 {
       def apply[A]: FLNil[A] = instance.asInstanceOf[FLNil[A]]
     }
 
-    final case class FLCons[A, B, C](f: A => Eval[B], k: FunTree[B, C]) extends FunList[A, C]
+    final case class FLCons[-A, B, +C](f: A => Eval[B], k: FunTree[B, C]) extends FunList[A, C]
 
     def from[A, B](f: FunTree[A, B]): FunList[A, B] =
       f match {
         case _: Empty[A]   => FLNil[A]
-        case l: Leaf[A, B] => FLCons(l.f, FunTree.empty)
+        case l: Leaf[A, B] => FLCons(l.f, FunTree.empty[B])
         case Node(l, r) =>
           @tailrec def loop[A1, B1, C1](l: FunTree[A1, B1], r: FunTree[B1, C1]): FunList[A1, C1] =
             l match {
-              case _: Empty[A1]    => loop(r, FunTree.empty)
+              case _: Empty[A1]    => loop(r.asInstanceOf[FunTree[A1, C1]], FunTree.empty[C1])
               case l: Leaf[A1, B1] => FLCons(l.f, r)
               case Node(l1, r1)    => loop(l1, r1 ++ r)
             }
