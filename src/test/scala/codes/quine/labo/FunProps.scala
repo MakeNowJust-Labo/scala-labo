@@ -10,19 +10,21 @@ object FunProps extends Scalaprops {
     case Fun(_, _, _, f) => f("monkey") == f("banana") && f("banana") == f("elephant")
   }
 
-  val fold = Property.forAllS[(List[Int], Int), Fun[(Int, Int), Int]] { case ((xs, z), Fun(_, _, _, f)) =>
-    xs.foldRight(z)(Function.untupled(f)) == xs.foldLeft(z)(Function.untupled(f))
+  val fold = Property.forAllS[(List[Int], Int), Fun[(Int, Int), Int]] {
+    case ((xs, z), Fun(_, _, _, f)) =>
+      xs.foldRight(z)(Function.untupled(f)) == xs.foldLeft(z)(Function.untupled(f))
   }
 
   val stateT = {
     implicit def stateTEqInstance[F[_], S, A](implicit ef: Eq[S => F[(S, A)]]): Eq[StateT[F, S, A]] = ef.by(_.run)
-    implicit def stateTAlternativeInstance[F[_]: FlatMap: Alternative, S]: Alternative[StateT[F, S, *]] = new Alternative[StateT[F, S, *]] {
-      def emptyK[A]: StateT[F, S, A] = StateT(_ => Alternative[F].emptyK)
-      def concatK[A](x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] = StateT(s => x.run(s) <+> y.run(s))
-      def pure[A](a: A): StateT[F, S, A] = StateT(s => Alternative[F].pure((s, a)))
-      def ap[A, B](ff: StateT[F, S, A => B])(fa: StateT[F, S, A]): StateT[F, S, B] =
-        ff.flatMap(f => fa.map(f)(FlatMap[F]))
-    }
+    implicit def stateTAlternativeInstance[F[_]: FlatMap: Alternative, S]: Alternative[StateT[F, S, *]] =
+      new Alternative[StateT[F, S, *]] {
+        def emptyK[A]: StateT[F, S, A] = StateT(_ => Alternative[F].emptyK)
+        def concatK[A](x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] = StateT(s => x.run(s) <+> y.run(s))
+        def pure[A](a: A): StateT[F, S, A] = StateT(s => Alternative[F].pure((s, a)))
+        def ap[A, B](ff: StateT[F, S, A => B])(fa: StateT[F, S, A]): StateT[F, S, B] =
+          ff.flatMap(f => fa.map(f)(FlatMap[F]))
+      }
 
     implicit def funScalapropsGenInstance[A: Cogen: PartialFunArg, B: Gen]: Gen[Fun[A, B]] =
       Fun.gen(true)
