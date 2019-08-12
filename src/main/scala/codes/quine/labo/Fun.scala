@@ -40,121 +40,83 @@ object PartialFun {
     def apply[A, B]: Empty[A, B] = instance.asInstanceOf[Empty[A, B]]
   }
 
-  final class Point[B] private (private[this] var b0: () => B) extends PartialFun[Unit, B] {
-    lazy val b: B = {
-      val x = b0()
-      b0 = null
-      x
-    }
-
+  final class Point[B] private (b: Lazy[B]) extends PartialFun[Unit, B] {
     def isEmpty: Boolean = false
-    def map[C](f: B => C): PartialFun[Unit, C] = Point(f(b))
-    def table: LazyList[(Unit, B)] = LazyList.cons(() -> b, LazyList.empty)
-    def toFunction(d: B): Unit => B = _ => b
-    def shrink(s: B => LazyList[B]): LazyList[PartialFun[Unit, B]] = s(b).map(point(_))
+    def map[C](f: B => C): PartialFun[Unit, C] = Point(f(b.value))
+    def table: LazyList[(Unit, B)] = LazyList.cons(() -> b.value, LazyList.empty)
+    def toFunction(d: B): Unit => B = _ => b.value
+    def shrink(s: B => LazyList[B]): LazyList[PartialFun[Unit, B]] = s(b.value).map(point(_))
 
-    override def toString: String =
-      if (b0 == null) s"Point($b)" else "Point(<not computed>)"
+    override def toString: String = s"Point($b)"
   }
 
   object Point {
-    def apply[B](b: => B): Point[B] = new Point(b _)
+    def apply[B](b: => B): Point[B] = new Point(Lazy(b))
   }
 
-  final class Uncurry[A, B, C] private (private[this] var abc0: () => PartialFun[A, PartialFun[B, C]])
-      extends PartialFun[(A, B), C] {
-    lazy val abc: PartialFun[A, PartialFun[B, C]] = {
-      val x = abc0()
-      abc0 = null
-      x
-    }
-
+  final class Uncurry[A, B, C] private (abc: Lazy[PartialFun[A, PartialFun[B, C]]]) extends PartialFun[(A, B), C] {
     def isEmpty: Boolean = false
-    def map[D](f: C => D): PartialFun[(A, B), D] = Uncurry(abc.map(_.map(f)))
+    def map[D](f: C => D): PartialFun[(A, B), D] = Uncurry(abc.value.map(_.map(f)))
     def table: LazyList[((A, B), C)] =
-      abc.table.flatMap { case (a, bc) => bc.table.map { case (b, c) => ((a, b), c) } }
-    def toFunction(d: C): ((A, B)) => C = { case (a, b) => abc.map(_.toFunction(d)(b)).toFunction(d)(a) }
+      abc.value.table.flatMap { case (a, bc) => bc.table.map { case (b, c) => ((a, b), c) } }
+    def toFunction(d: C): ((A, B)) => C = { case (a, b) => abc.value.map(_.toFunction(d)(b)).toFunction(d)(a) }
     def shrink(s: C => LazyList[C]): LazyList[PartialFun[(A, B), C]] =
-      abc.shrink(bc => bc.shrink(s)).map(uncurry(_))
+      abc.value.shrink(bc => bc.shrink(s)).map(uncurry(_))
 
-    override def toString: String =
-      if (abc0 == null) s"Uncurry($abc)" else "Uncurry(<not computed>)"
+    override def toString: String = s"Uncurry($abc)"
   }
 
   object Uncurry {
-    def apply[A, B, C](abc: => PartialFun[A, PartialFun[B, C]]): Uncurry[A, B, C] =
-      new Uncurry(abc _)
+    def apply[A, B, C](abc: PartialFun[A, PartialFun[B, C]]): Uncurry[A, B, C] = new Uncurry(Lazy(abc))
   }
 
-  final class Choice[A, B, C] private (private[this] var ac0: () => PartialFun[A, C],
-                                       private[this] var bc0: () => PartialFun[B, C])
+  final class Choice[A, B, C] private (ac: Lazy[PartialFun[A, C]], bc: Lazy[PartialFun[B, C]])
       extends PartialFun[Either[A, B], C] {
-    lazy val ac: PartialFun[A, C] = {
-      val x = ac0()
-      ac0 = null
-      x
-    }
-    lazy val bc: PartialFun[B, C] = {
-      val y = bc0()
-      bc0 = null
-      y
-    }
-
     def isEmpty: Boolean = false
-    def map[D](f: C => D): PartialFun[Either[A, B], D] = Choice(ac.map(f), bc.map(f))
+    def map[D](f: C => D): PartialFun[Either[A, B], D] = Choice(ac.value.map(f), bc.value.map(f))
     def table: LazyList[(Either[A, B], C)] =
-      ac.table.map { case (a, c) => (Left(a), c) } ++ bc.table.map { case (b, c) => (Right(b), c) }
+      ac.value.table.map { case (a, c) => (Left(a), c) } ++ bc.value.table.map { case (b, c) => (Right(b), c) }
     def toFunction(d: C): Either[A, B] => C = {
-      lazy val f = ac.toFunction(d)
-      lazy val g = bc.toFunction(d)
+      lazy val f = ac.value.toFunction(d)
+      lazy val g = bc.value.toFunction(d)
       (_: Either[A, B]) match {
         case Left(a)  => f(a)
         case Right(b) => g(b)
       }
     }
     def shrink(s: C => LazyList[C]): LazyList[PartialFun[Either[A, B], C]] =
-      (if (!ac.isEmpty && !bc.isEmpty) LazyList(choice(ac, Empty[B, C]), choice(Empty[A, C], bc)) else LazyList.empty) #:::
-        bc.shrink(s).map(choice(ac, _)) #::: ac.shrink(s).map(choice(_, bc))
+      (if (!ac.value.isEmpty && !bc.value.isEmpty)
+         LazyList(choice(ac.value, Empty[B, C]), choice(Empty[A, C], bc.value))
+       else LazyList.empty) #:::
+        bc.value.shrink(s).map(choice(ac.value, _)) #::: ac.value.shrink(s).map(choice(_, bc.value))
 
-    override def toString: String = (ac0, bc0) match {
-      case (null, null) => s"Choice($ac, $bc)"
-      case (null, _)    => s"Choice($ac, <not computed>)"
-      case (_, null)    => s"Choice(<not computed>, $bc)"
-      case _            => s"Choice(<not computed>, <not computed>)"
-    }
+    override def toString: String = s"Choice($ac, $bc)"
   }
 
   object Choice {
     def apply[A, B, C](ac: => PartialFun[A, C], bc: => PartialFun[B, C]): Choice[A, B, C] =
-      new Choice(ac _, bc _)
+      new Choice(Lazy(ac), Lazy(bc))
   }
 
-  final class Iso[A, B, C] private (val embed: A => B, val eject: B => A, private[this] var bc0: () => PartialFun[B, C])
+  final class Iso[A, B, C] private (val embed: A => B, val eject: B => A, bc: Lazy[PartialFun[B, C]])
       extends PartialFun[A, C] {
-    lazy val bc = {
-      val x = bc0()
-      bc0 = null
-      x
-    }
-
     def isEmpty: Boolean = false
-    def map[D](f: C => D): PartialFun[A, D] = Iso(embed, eject, bc.map(f))
+    def map[D](f: C => D): PartialFun[A, D] = Iso(embed, eject, bc.value.map(f))
     def table: LazyList[(A, C)] =
-      bc.table.map { case (b, c) => (eject(b), c) }
+      bc.value.table.map { case (b, c) => (eject(b), c) }
     def toFunction(d: C): A => C = {
-      lazy val g = bc.toFunction(d)
+      lazy val g = bc.value.toFunction(d)
       (a: A) => g(embed(a))
     }
     def shrink(s: C => LazyList[C]): LazyList[PartialFun[A, C]] =
-      bc.shrink(s).map(iso(embed, eject, _))
+      bc.value.shrink(s).map(iso(embed, eject, _))
 
-    override def toString: String =
-      if (bc0 == null) s"Iso(<embed>, <eject>, $bc)" else "Iso(<embed>, <eject>, <not computed>)"
+    override def toString: String = s"Iso(<embed>, <eject>, $bc)"
   }
 
   object Iso {
     def apply[A, B, C](embed: A => B, eject: B => A, bc: => PartialFun[B, C]): Iso[A, B, C] =
-      new Iso(embed, eject, bc _)
+      new Iso(embed, eject, Lazy(bc))
 
     def build[A, B, C](embed: A => B, eject: B => A, f: A => C)(implicit B: PartialFunArg[B]): Iso[A, B, C] =
       Iso(embed, eject, B.build(b => f(eject(b))))
