@@ -9,8 +9,6 @@ final class Lazy[A] private (private[this] var thunk: () => A) {
 
   override def toString: String =
     if (thunk == null) value.toString else "<not computed>"
-
-  def isEvaluated: Boolean = thunk == null
 }
 
 object Lazy {
