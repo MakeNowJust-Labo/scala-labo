@@ -232,6 +232,7 @@ object PartialFunArg {
   implicit val char: PartialFunArg[Char] = int.by(_.toInt, _.toChar)
   implicit def array[A: PartialFunArg: ClassTag]: PartialFunArg[Array[A]] = list[A].by(_.toList, _.toArray)
   implicit val string: PartialFunArg[String] = array[Char].by(_.toCharArray, String.valueOf(_))
+  implicit val bigInt: PartialFunArg[BigInt] = array[Byte].by(_.toByteArray, BigInt(_))
 }
 
 final case class Fun[A, B](ab: PartialFun[A, B], d: B, isShrunk: Boolean, f: A => B) {

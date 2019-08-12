@@ -16,7 +16,7 @@ object FunProps extends Scalaprops {
   }
 
   val byte = Property.forAllS[Fun[(Byte, List[Byte]), Int]] {
-    case Fun(_, _, _, f) => f((1, List(127, 2))) == f((127, List(2))) && f((127, List(2))) == f((127, List(1, 2, 3)))
+    case Fun(_, _, _, f) => f((1, List(127, 2))) == f((2, List(2))) && f((2, List(2))) == f((1, List(1, 2, 3)))
   }
 
   val stateT = {
