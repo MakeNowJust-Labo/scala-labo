@@ -18,7 +18,7 @@ object Generic {
   implicit def materialize[A, R]: Aux[A, R] = macro GenericMacros.materialize[A, R]
 }
 
-trait ReprTypes {
+private[dali] trait ReprTypes {
   val c: blackbox.Context
   import c.universe._
 
@@ -90,6 +90,10 @@ class GenericMacros(val c: whitebox.Context) extends ReprTypes {
     }
 
   def mkProductGeneric(tpe: Type): Tree = {
+    if (classSym(tpe).isModuleClass) {
+      return mkSingletonGeneric(tpe)
+    }
+
     val fields = fieldsOf(tpe)
     val elems = fields.map { case (name, tpe) => (TermName(c.freshName("pat")), tpe) }
     val companion = tpe.typeSymbol.companion
@@ -115,6 +119,23 @@ class GenericMacros(val c: whitebox.Context) extends ReprTypes {
         def eject(r: Repr): $tpe = (r match { case $reprPattern => $construct })
       }
       new $clsName: _root_.codes.quine.labo.dali.Generic.Aux[$tpe, $reprTpe]
+    """
+  }
+
+  def mkSingletonGeneric(tpe: Type): Tree = {
+    val singleton = tpe match {
+      case SingleType(tpe, sym) => sym
+      case _                    => abort(s"BUG: $tpe is not singleton")
+    }
+
+    val clsName = TypeName(c.freshName("anon$"))
+    q"""
+      final class $clsName extends _root_.codes.quine.labo.dali.Generic[$tpe] {
+        type Repr = _root_.codes.quine.labo.dali.HNil
+        def embed(a: $tpe): Repr = _root_.codes.quine.labo.dali.HNil
+        def eject(r: Repr): $tpe = $singleton
+      }
+      new $clsName: _root_.codes.quine.labo.dali.Generic.Aux[$tpe, _root_.codes.quine.labo.dali.HNil]
     """
   }
 
