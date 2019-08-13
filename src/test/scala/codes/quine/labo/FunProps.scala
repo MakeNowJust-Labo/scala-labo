@@ -7,7 +7,7 @@ import neko._, data._, instances._, laws._, props._, syntax._
 
 object FunProps extends Scalaprops {
   val prop = Property.forAllS[Fun[String, Int]] {
-    case Fun(_, _, _, f) => f("monkey") == f("banana") && f("banana") == f("elephant")
+    case Fun(_, _, _, f) => f("あいうえお") == f("かきくけこ") && f("かきくけこ") == f("さしすせそ")
   }
 
   val fold = Property.forAllS[(List[Int], Int), Fun[(Int, Int), Int]] {
@@ -46,4 +46,12 @@ object FunProps extends Scalaprops {
       laws.alternativeRightDistributivity(fa, ff, fg)
     }
   }
+
+  /*
+   * Small result:
+   * 
+   * 1. Fun.from(false -> None)(Some((false,false)))
+   * 2. Fun.from(false -> None)(Some((false,Fun.from(false -> true, true -> true)(true))))
+   * 3. Fun.from(false -> None)(Some((true,Fun.from(false -> false, true -> true)(false)))
+   */
 }

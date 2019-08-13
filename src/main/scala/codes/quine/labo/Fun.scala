@@ -44,18 +44,18 @@ object PartialFun {
     def apply[A, B]: Empty[A, B] = instance.asInstanceOf[Empty[A, B]]
   }
 
-  final class Point[B] private (b: Lazy[B]) extends PartialFun[Unit, B] {
+  final class Point[B] private (b: B) extends PartialFun[Unit, B] {
     def isEmpty: Boolean = false
-    def map[C](f: B => C): PartialFun[Unit, C] = Point(f(b.value))
-    def table: LazyList[(Unit, B)] = LazyList.cons(() -> b.value, LazyList.empty)
-    def toFunction(d: B): Unit => B = _ => b.value
-    def shrink(s: B => LazyList[B]): LazyList[PartialFun[Unit, B]] = s(b.value).map(point(_))
+    def map[C](f: B => C): PartialFun[Unit, C] = Point(f(b))
+    def table: LazyList[(Unit, B)] = LazyList.cons(() -> b, LazyList.empty)
+    def toFunction(d: B): Unit => B = _ => b
+    def shrink(s: B => LazyList[B]): LazyList[PartialFun[Unit, B]] = s(b).map(point(_))
 
-    override def toString: String = s"Point($b)"
+    override def toString: String = s"Point($b.value)"
   }
 
   object Point {
-    def apply[B](b: => B): Point[B] = new Point(Lazy(b))
+    def apply[B](b: B): Point[B] = new Point(b)
   }
 
   final class Uncurry[A, B, C] private (abc: Lazy[PartialFun[A, PartialFun[B, C]]]) extends PartialFun[(A, B), C] {
@@ -102,25 +102,25 @@ object PartialFun {
       new Choice(Lazy(ac), Lazy(bc))
   }
 
-  final class Iso[A, B, C] private (val embed: A => B, val eject: B => A, bc: Lazy[PartialFun[B, C]])
+  final class Iso[A, B, C] private (val embed: A => B, val eject: B => A, bc: PartialFun[B, C])
       extends PartialFun[A, C] {
     def isEmpty: Boolean = false
-    def map[D](f: C => D): PartialFun[A, D] = Iso(embed, eject, bc.value.map(f))
+    def map[D](f: C => D): PartialFun[A, D] = Iso(embed, eject, bc.map(f))
     def table: LazyList[(A, C)] =
-      bc.value.table.map { case (b, c) => (eject(b), c) }
+      bc.table.map { case (b, c) => (eject(b), c) }
     def toFunction(d: C): A => C = {
-      lazy val g = bc.value.toFunction(d)
+      lazy val g = bc.toFunction(d)
       (a: A) => g(embed(a))
     }
     def shrink(s: C => LazyList[C]): LazyList[PartialFun[A, C]] =
-      bc.value.shrink(s).map(iso(embed, eject, _))
+      bc.shrink(s).map(iso(embed, eject, _))
 
     override def toString: String = s"Iso($embed, $eject, $bc)"
   }
 
   object Iso {
-    def apply[A, B, C](embed: A => B, eject: B => A, bc: => PartialFun[B, C]): Iso[A, B, C] =
-      new Iso(embed, eject, Lazy(bc))
+    def apply[A, B, C](embed: A => B, eject: B => A, bc: PartialFun[B, C]): Iso[A, B, C] =
+      new Iso(embed, eject, bc)
 
     def build[A, B, C](embed: A => B, eject: B => A, f: A => C)(implicit B: PartialFunArg[B]): Iso[A, B, C] =
       Iso(embed, eject, B.build(b => f(eject(b))))
@@ -232,7 +232,7 @@ object PartialFunArg {
   implicit val char: PartialFunArg[Char] = int.by(_.toInt, _.toChar)
   implicit def array[A: PartialFunArg: ClassTag]: PartialFunArg[Array[A]] = list[A].by(_.toList, _.toArray)
   implicit val string: PartialFunArg[String] = array[Char].by(_.toCharArray, String.valueOf(_))
-  implicit val bigInt: PartialFunArg[BigInt] = array[Byte].by(_.toByteArray, BigInt(_))
+  implicit val bigInt: PartialFunArg[BigInt] = array[Byte].by(_.toByteArray, x => if (x.length == 0) 0 else BigInt(x))
 }
 
 final case class Fun[A, B](ab: PartialFun[A, B], d: B, isShrunk: Boolean, f: A => B) {
@@ -282,5 +282,45 @@ package object fun {
     Shrink.shrink {
       case true  => Stream(false)
       case flase => Stream.empty
+    }
+
+  @silent implicit def listShrinkInstance[A](implicit s: Shrink[A]): Shrink[List[A]] = {
+      def interleave[B](s1: Stream[B], s2: Stream[B]): Stream[B] =
+        if (s1.isEmpty) s2
+        else s1.head #:: interleave(s2, s1.tail)
+  
+      def removeChunks(n: Int, as: List[A]): Stream[List[A]] =
+        as match {
+          case Nil =>
+            Stream.Empty
+          case _ :: Nil =>
+            Stream.cons(Nil, Stream.Empty)
+          case _ =>
+            val n1 = n / 2
+            val n2 = n - n1
+            val as1 = as.take(n1)
+            Stream.cons(
+              as1,
+              {
+                val as2 = as.drop(n1)
+                Stream.cons(
+                  as2,
+                  interleave(
+                    removeChunks(n1, as1).withFilter(_.nonEmpty).map(_ ::: as2),
+                    removeChunks(n2, as2).withFilter(_.nonEmpty).map(as1 ::: _)
+                  )
+                )
+              }
+            )
+        }
+  
+      def shrinkOne(as: List[A]): Stream[List[A]] = as match {
+        case h :: t =>
+          s(h).map(_ :: t) #::: shrinkOne(t).map(h :: _)
+        case _ =>
+          Stream.Empty
+      }
+  
+      Shrink.shrink(as => removeChunks(as.length, as) #::: shrinkOne(as))
     }
 }
