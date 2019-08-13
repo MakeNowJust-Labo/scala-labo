@@ -48,10 +48,10 @@ object FunProps extends Scalaprops {
   }
 
   /*
-   * Small result:
-   * 
-   * 1. Fun.from(false -> None)(Some((false,false)))
-   * 2. Fun.from(false -> None)(Some((false,Fun.from(false -> true, true -> true)(true))))
-   * 3. Fun.from(false -> None)(Some((true,Fun.from(false -> false, true -> true)(false)))
-   */
+ * Small result:
+ *
+ * 1. Fun.from(false -> None)(Some((false,false)))
+ * 2. Fun.from(false -> None)(Some((false,Fun.from(false -> true, true -> true)(true))))
+ * 3. Fun.from(false -> None)(Some((true,Fun.from(false -> false, true -> true)(false)))
+ */
 }

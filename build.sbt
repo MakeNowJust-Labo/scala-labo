@@ -31,8 +31,8 @@ lazy val root = project
     addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.4.3" cross CrossVersion.full),
     libraryDependencies += "com.github.ghik" % "silencer-lib" % "1.4.3" % Provided cross CrossVersion.full
   )
-  .dependsOn(neko, free)
-  .aggregate(neko, free)
+  .dependsOn(neko, free, dali)
+  .aggregate(neko, free, dali)
 
 lazy val neko = project
   .in(file("modules/neko"))
@@ -55,3 +55,11 @@ lazy val free = project
     commonSettings
   )
   .dependsOn(neko)
+
+lazy val dali = project
+  .in(file("modules/dali"))
+  .settings(
+    name := "dali",
+    libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
+    commonSettings
+  )

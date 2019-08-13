@@ -285,42 +285,41 @@ package object fun {
     }
 
   @silent implicit def listShrinkInstance[A](implicit s: Shrink[A]): Shrink[List[A]] = {
-      def interleave[B](s1: Stream[B], s2: Stream[B]): Stream[B] =
-        if (s1.isEmpty) s2
-        else s1.head #:: interleave(s2, s1.tail)
-  
-      def removeChunks(n: Int, as: List[A]): Stream[List[A]] =
-        as match {
-          case Nil =>
-            Stream.Empty
-          case _ :: Nil =>
-            Stream.cons(Nil, Stream.Empty)
-          case _ =>
-            val n1 = n / 2
-            val n2 = n - n1
-            val as1 = as.take(n1)
-            Stream.cons(
-              as1,
-              {
-                val as2 = as.drop(n1)
-                Stream.cons(
-                  as2,
-                  interleave(
-                    removeChunks(n1, as1).withFilter(_.nonEmpty).map(_ ::: as2),
-                    removeChunks(n2, as2).withFilter(_.nonEmpty).map(as1 ::: _)
-                  )
-                )
-              }
-            )
-        }
-  
-      def shrinkOne(as: List[A]): Stream[List[A]] = as match {
-        case h :: t =>
-          s(h).map(_ :: t) #::: shrinkOne(t).map(h :: _)
-        case _ =>
+    def interleave[B](s1: Stream[B], s2: Stream[B]): Stream[B] =
+      if (s1.isEmpty) s2
+      else s1.head #:: interleave(s2, s1.tail)
+
+    def removeChunks(n: Int, as: List[A]): Stream[List[A]] =
+      as match {
+        case Nil =>
           Stream.Empty
+        case _ :: Nil =>
+          Stream.cons(Nil, Stream.Empty)
+        case _ =>
+          val n1 = n / 2
+          val n2 = n - n1
+          val as1 = as.take(n1)
+          Stream.cons(
+            as1, {
+              val as2 = as.drop(n1)
+              Stream.cons(
+                as2,
+                interleave(
+                  removeChunks(n1, as1).withFilter(_.nonEmpty).map(_ ::: as2),
+                  removeChunks(n2, as2).withFilter(_.nonEmpty).map(as1 ::: _)
+                )
+              )
+            }
+          )
       }
-  
-      Shrink.shrink(as => removeChunks(as.length, as) #::: shrinkOne(as))
+
+    def shrinkOne(as: List[A]): Stream[List[A]] = as match {
+      case h :: t =>
+        s(h).map(_ :: t) #::: shrinkOne(t).map(h :: _)
+      case _ =>
+        Stream.Empty
     }
+
+    Shrink.shrink(as => removeChunks(as.length, as) #::: shrinkOne(as))
+  }
 }
