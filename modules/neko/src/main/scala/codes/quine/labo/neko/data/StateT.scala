@@ -25,6 +25,7 @@ object StateT extends StateTInstances0 {
   def get[F[_], S](implicit F: Applicative[F]): StateT[F, S, S] = StateT(s => F.pure((s, s)))
   def put[F[_], S](s: S)(implicit F: Applicative[F]): StateT[F, S, Unit] = StateT(_ => F.pure((s, ())))
   def modify[F[_], S](f: S => S)(implicit F: Applicative[F]): StateT[F, S, Unit] = StateT(s => F.pure((f(s), ())))
+  def inspect[F[_], S, A](f: S => A)(implicit F: Applicative[F]): StateT[F, S, A] = StateT(s => F.pure((s, f(s))))
 
   private[data] def tailRecM[F[_]: FlatMap, S, A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] =
     StateT { s =>

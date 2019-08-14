@@ -45,5 +45,6 @@ package object data {
     def get[S]: State[S, S] = StateT.get[Id, S]
     def put[S](s: S): State[S, Unit] = StateT.put(s)
     def modify[S](f: S => S): State[S, Unit] = StateT.modify(f)
+    def inspect[S, A](f: S => A): State[S, A] = StateT.inspect(f)
   }
 }
