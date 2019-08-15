@@ -2,6 +2,8 @@ package codes.quine.labo
 package neko
 package data
 
+import syntax._
+
 final case class ContT[F[_], R, A](run: (A => F[R]) => F[R]) {
   def map[B](f: A => B)(implicit F: Defer[F]): ContT[F, R, B] =
     ContT(k => F.defer(run(a => k(f(a)))))
@@ -38,6 +40,16 @@ private[data] trait ContTInstances0 {
         loop(a)
       }
   }
+
+  implicit def contTMonadTransInstance[G[_]: Monad: Defer, R]: MonadTrans[ContT[*[_], R, *], G] =
+    new MonadTrans[ContT[*[_], R, *], G] {
+      val monad: Monad[ContT[G, R, *]] = contTMonadInstances
+      val innerMonad: Monad[G] = Monad[G]
+
+      def lift[A](ga: G[A]): ContT[G, R, A] = ContT(k => Defer[G].defer(ga.flatMap(k)))
+      def trans[A](fa: ContT[G, R, A])(t: G ~> G, u: G ~> G): ContT[G, R, A] =
+        ContT(k => Defer[G].defer(t(fa.run(a => Defer[G].defer(u(k(a)))))))
+    }
 
   implicit def contTDeferInstane[F[_]: Defer, R]: Defer[ContT[F, R, *]] = new Defer[ContT[F, R, *]] {
     def defer[A](fa: => ContT[F, R, A]): ContT[F, R, A] = ContT.defer(fa)

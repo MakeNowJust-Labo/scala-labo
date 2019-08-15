@@ -75,6 +75,33 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
     def tailRecM[A, B](a: A)(f: A => WriterT[F, L, Either[A, B]]): WriterT[F, L, B] = WriterT.tailRecM(a)(f)
   }
 
+  implicit def writerTMonadTransControlInstance[G[_]: Monad, L: Monoid]: MonadTransControl[WriterT[*[_], L, *], G] =
+    new MonadTransControl[WriterT[*[_], L, *], G] {
+      type State[A] = (L, A)
+      type GS[A] = G[State[A]]
+
+      val monad: Monad[WriterT[G, L, *]] = writerTMonadInstance
+      val innerMonad: Monad[G] = Monad[G]
+
+      def lift[A](ga: G[A]): WriterT[G, L, A] = WriterT(ga.map((Monoid[L].empty, _)))
+      def transMap[A](fa: WriterT[G, L, A])(t: G ~> G): WriterT[G, L, A] =
+        WriterT(t(fa.run))
+
+      def restore[A](s: (L, A)): WriterT[G, L, A] = WriterT(innerMonad.pure(s))
+      def zero[A](s: (L, A)): Boolean = false
+
+      def transControl[A](cps: (WriterT[G, L, *] ~> GS) => G[A]): WriterT[G, L, A] =
+        WriterT(cps(Lambda[WriterT[G, L, *] ~> GS](_.run)).map((Monoid[L].empty, _)))
+    }
+
+  implicit def writerTMonadWriterInstance[G[_]: Monad, L: Monoid]: MonadWriter[WriterT[G, L, *], L] =
+    new MonadWriter[WriterT[G, L, *], L] {
+      val monad: Monad[WriterT[G, L, *]] = writerTMonadInstance
+
+      def tell(l: L): WriterT[G, L, Unit] = WriterT.tell(l)
+      def listen[A](fa: WriterT[G, L, A]): WriterT[G, L, (L, A)] = WriterT.listen(fa)
+    }
+
   implicit def writerTSemigroupKInstance[F[_]: SemigroupK, L]: SemigroupK[WriterT[F, L, *]] =
     new SemigroupK[WriterT[F, L, *]] {
       def concatK[A](x: WriterT[F, L, A], y: WriterT[F, L, A]): WriterT[F, L, A] = WriterT(x.run <+> y.run)

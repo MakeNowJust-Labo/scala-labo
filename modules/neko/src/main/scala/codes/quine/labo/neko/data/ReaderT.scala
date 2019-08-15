@@ -54,6 +54,31 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
     def tailRecM[A, B](a: A)(f: A => ReaderT[F, E, Either[A, B]]): ReaderT[F, E, B] = ReaderT.tailRecM(a)(f)
   }
 
+  implicit def readerTMonadTransControlInstance[G[_]: Monad, E]: MonadTransControl[ReaderT[*[_], E, *], G] =
+    new MonadTransControl[ReaderT[*[_], E, *], G] {
+      type State[A] = A
+
+      val monad: Monad[ReaderT[G, E, *]] = readerTMonadInstance
+      val innerMonad: Monad[G] = Monad[G]
+
+      def lift[A](ga: G[A]): ReaderT[G, E, A] = ReaderT(_ => ga)
+      def transMap[A](fa: ReaderT[G, E, A])(t: G ~> G): ReaderT[G, E, A] =
+        ReaderT(e => t(fa.run(e)))
+
+      def restore[A](s: A): ReaderT[G, E, A] = ReaderT(e => innerMonad.pure(s))
+      def zero[A](s: A): Boolean = false
+      def transControl[A](cps: (ReaderT[G, E, *] ~> G) => G[A]): ReaderT[G, E, A] =
+        ReaderT(e => cps(Lambda[ReaderT[G, E, *] ~> G](_.run(e))))
+    }
+
+  implicit def readerTMonadReaderInstance[G[_]: Monad, E]: MonadReader[ReaderT[G, E, *], E] =
+    new MonadReader[ReaderT[G, E, *], E] {
+      val monad: Monad[ReaderT[G, E, *]] = readerTMonadInstance
+
+      def ask: ReaderT[G, E, E] = ReaderT.ask
+      def local[A](f: E => E)(fa: ReaderT[G, E, A]): ReaderT[G, E, A] = ReaderT.local(f)(fa)
+    }
+
   implicit def readerTSemigroupInstance[F[_], E, A](implicit FA: Semigroup[F[A]]): Semigroup[ReaderT[F, E, A]] =
     new Semigroup[ReaderT[F, E, A]] {
       def concat(x: ReaderT[F, E, A], y: ReaderT[F, E, A]): ReaderT[F, E, A] = ReaderT(e => x.run(e) |+| y.run(e))

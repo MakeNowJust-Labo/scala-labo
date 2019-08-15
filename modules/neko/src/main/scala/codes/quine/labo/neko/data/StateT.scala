@@ -51,6 +51,31 @@ private[data] trait StateTInstances0 {
     def tailRecM[A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] = StateT.tailRecM(a)(f)
   }
 
+  implicit def stateTMonadTransControlInstance[G[_]: Monad, S]: MonadTransControl[StateT[*[_], S, *], G] =
+    new MonadTransControl[StateT[*[_], S, *], G] {
+      type State[A] = (S, A)
+      type GS[A] = G[State[A]]
+
+      val monad: Monad[StateT[G, S, *]] = stateTMonadInstance
+      val innerMonad: Monad[G] = Monad[G]
+
+      def lift[A](ga: G[A]): StateT[G, S, A] = StateT(s => ga.map((s, _)))
+      def transMap[A](fa: StateT[G, S, A])(t: G ~> G): StateT[G, S, A] =
+        StateT(s => t(fa.run(s)))
+
+      def restore[A](s: (S, A)): StateT[G, S, A] = StateT(_ => innerMonad.pure(s))
+      def zero[A](s: (S, A)): Boolean = false
+      def transControl[A](cps: (StateT[G, S, *] ~> GS) => G[A]): StateT[G, S, A] =
+        StateT(s => cps(Lambda[StateT[G, S, *] ~> GS](_.run(s))).map((s, _)))
+    }
+
+  implicit def stateTMonadStateInstance[F[_]: Monad, S]: MonadState[StateT[F, S, *], S] =
+    new MonadState[StateT[F, S, *], S] {
+      val monad = stateTMonadInstance[F, S]
+      def get: StateT[F, S, S] = StateT.get
+      def put(s: S): StateT[F, S, Unit] = StateT.put(s)
+    }
+
   implicit def stateTSemigroupInstance[F[_], S, A](implicit FSA: Semigroup[F[(S, A)]]): Semigroup[StateT[F, S, A]] =
     new Semigroup[StateT[F, S, A]] {
       def concat(x: StateT[F, S, A], y: StateT[F, S, A]): StateT[F, S, A] = StateT(s => x.run(s) |+| y.run(s))
