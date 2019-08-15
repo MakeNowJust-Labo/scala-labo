@@ -18,12 +18,11 @@ object MonadState {
   def inspect[F[_], S, A](f: S => A)(implicit state: MonadState[F, S]): F[A] = state.inspect(f)
   def modify[F[_], S](f: S => S)(implicit state: MonadState[F, S]): F[Unit] = state.modify(f)
 
-  implicit def trans[F[_[_], _], G[_], S](implicit FG: MonadTransFunctor[F, G],
-                                          state: MonadState[G, S]): MonadState[F[G, *], S] =
-    new MonadState[F[G, *], S] {
-      val monad: Monad[F[G, *]] = FG.monad
+  implicit def trans[F[_], G[_], S](implicit FG: MonadTransFunctor[F, G], state: MonadState[G, S]): MonadState[F, S] =
+    new MonadState[F, S] {
+      val monad: Monad[F] = FG.monad
 
-      def get: F[G, S] = FG.lift(state.get)
-      def put(s: S): F[G, Unit] = FG.lift(state.put(s))
+      def get: F[S] = FG.lift(state.get)
+      def put(s: S): F[Unit] = FG.lift(state.put(s))
     }
 }

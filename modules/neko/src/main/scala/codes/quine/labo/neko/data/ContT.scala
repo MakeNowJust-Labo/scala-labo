@@ -41,8 +41,8 @@ private[data] trait ContTInstances0 {
       }
   }
 
-  implicit def contTMonadTransInstance[G[_]: Monad: Defer, R]: MonadTrans[ContT[*[_], R, *], G] =
-    new MonadTrans[ContT[*[_], R, *], G] {
+  implicit def contTMonadTransInstance[G[_]: Monad: Defer, R]: MonadTrans[ContT[G, R, *], G] =
+    new MonadTrans[ContT[G, R, *], G] {
       val monad: Monad[ContT[G, R, *]] = contTMonadInstances
       val innerMonad: Monad[G] = Monad[G]
 

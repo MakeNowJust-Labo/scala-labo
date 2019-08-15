@@ -75,10 +75,9 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
     def tailRecM[A, B](a: A)(f: A => WriterT[F, L, Either[A, B]]): WriterT[F, L, B] = WriterT.tailRecM(a)(f)
   }
 
-  implicit def writerTMonadTransControlInstance[G[_]: Monad, L: Monoid]: MonadTransControl[WriterT[*[_], L, *], G] =
-    new MonadTransControl[WriterT[*[_], L, *], G] {
+  implicit def writerTMonadTransControlInstance[G[_]: Monad, L: Monoid]: MonadTransControl[WriterT[G, L, *], G] =
+    new MonadTransControl[WriterT[G, L, *], G] {
       type State[A] = (L, A)
-      type GS[A] = G[State[A]]
 
       val monad: Monad[WriterT[G, L, *]] = writerTMonadInstance
       val innerMonad: Monad[G] = Monad[G]
@@ -90,8 +89,8 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
       def restore[A](s: (L, A)): WriterT[G, L, A] = WriterT(innerMonad.pure(s))
       def zero[A](s: (L, A)): Boolean = false
 
-      def transControl[A](cps: (WriterT[G, L, *] ~> GS) => G[A]): WriterT[G, L, A] =
-        WriterT(cps(Lambda[WriterT[G, L, *] ~> GS](_.run)).map((Monoid[L].empty, _)))
+      def transControl[A](cps: (WriterT[G, L, *] ~> StateOfG) => G[A]): WriterT[G, L, A] =
+        WriterT(cps(Lambda[WriterT[G, L, *] ~> StateOfG](_.run)).map((Monoid[L].empty, _)))
     }
 
   implicit def writerTMonadWriterInstance[G[_]: Monad, L: Monoid]: MonadWriter[WriterT[G, L, *], L] =

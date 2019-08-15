@@ -54,8 +54,8 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
     def tailRecM[A, B](a: A)(f: A => ReaderT[F, E, Either[A, B]]): ReaderT[F, E, B] = ReaderT.tailRecM(a)(f)
   }
 
-  implicit def readerTMonadTransControlInstance[G[_]: Monad, E]: MonadTransControl[ReaderT[*[_], E, *], G] =
-    new MonadTransControl[ReaderT[*[_], E, *], G] {
+  implicit def readerTMonadTransControlInstance[G[_]: Monad, E]: MonadTransControl[ReaderT[G, E, *], G] =
+    new MonadTransControl[ReaderT[G, E, *], G] {
       type State[A] = A
 
       val monad: Monad[ReaderT[G, E, *]] = readerTMonadInstance

@@ -14,13 +14,13 @@ object MonadWriter {
   def tell[F[_], L](l: L)(implicit writer: MonadWriter[F, L]): F[Unit] = writer.tell(l)
   def listen[F[_], L, A](fa: F[A])(implicit writer: MonadWriter[F, L]): F[(L, A)] = writer.listen(fa)
 
-  implicit def trans[F[_[_], _], G[_], L](implicit FG: MonadTransControl[F, G],
-                                          writer: MonadWriter[G, L]): MonadWriter[F[G, *], L] =
-    new MonadWriter[F[G, *], L] {
+  implicit def trans[F[_], G[_], L](implicit FG: MonadTransControl[F, G],
+                                    writer: MonadWriter[G, L]): MonadWriter[F, L] =
+    new MonadWriter[F, L] {
       val monad = FG.monad
 
-      def tell(l: L): F[G, Unit] = FG.lift(writer.tell(l))
-      def listen[A](fa: F[G, A]): F[G, (L, A)] =
+      def tell(l: L): F[Unit] = FG.lift(writer.tell(l))
+      def listen[A](fa: F[A]): F[(L, A)] =
         monad.flatMap(FG.transControl(k => writer.listen(k(fa)))) {
           case (l, s) => monad.map(FG.restore(s))(a => (l, a))
         }

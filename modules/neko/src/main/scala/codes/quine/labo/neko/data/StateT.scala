@@ -51,10 +51,9 @@ private[data] trait StateTInstances0 {
     def tailRecM[A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] = StateT.tailRecM(a)(f)
   }
 
-  implicit def stateTMonadTransControlInstance[G[_]: Monad, S]: MonadTransControl[StateT[*[_], S, *], G] =
-    new MonadTransControl[StateT[*[_], S, *], G] {
+  implicit def stateTMonadTransControlInstance[G[_]: Monad, S]: MonadTransControl[StateT[G, S, *], G] =
+    new MonadTransControl[StateT[G, S, *], G] {
       type State[A] = (S, A)
-      type GS[A] = G[State[A]]
 
       val monad: Monad[StateT[G, S, *]] = stateTMonadInstance
       val innerMonad: Monad[G] = Monad[G]
@@ -65,8 +64,8 @@ private[data] trait StateTInstances0 {
 
       def restore[A](s: (S, A)): StateT[G, S, A] = StateT(_ => innerMonad.pure(s))
       def zero[A](s: (S, A)): Boolean = false
-      def transControl[A](cps: (StateT[G, S, *] ~> GS) => G[A]): StateT[G, S, A] =
-        StateT(s => cps(Lambda[StateT[G, S, *] ~> GS](_.run(s))).map((s, _)))
+      def transControl[A](cps: (StateT[G, S, *] ~> StateOfG) => G[A]): StateT[G, S, A] =
+        StateT(s => cps(Lambda[StateT[G, S, *] ~> StateOfG](_.run(s))).map((s, _)))
     }
 
   implicit def stateTMonadStateInstance[F[_]: Monad, S]: MonadState[StateT[F, S, *], S] =
