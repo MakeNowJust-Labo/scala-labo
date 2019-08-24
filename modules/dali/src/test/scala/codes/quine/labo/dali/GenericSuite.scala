@@ -7,7 +7,7 @@ object GenericSuite extends SimpleTestSuite {
   import higher.Generic1Suite.{MyCons, MyList, MyNil}
 
   sealed trait Expr
-  object Zero extends Expr
+  object Var extends Expr
   case class Val(x: Int) extends Expr
   case class Add(l: Expr, r: Expr) extends Expr
 
@@ -19,16 +19,16 @@ object GenericSuite extends SimpleTestSuite {
     val v2 = Val(2)
     val add = Add(v1, v2)
 
-    Generic[Expr]: Generic.Aux[Expr, Add :+: Val :+: Zero.type :+: CNil]
-    Generic[Zero.type]: Generic.Aux[Zero.type, HNil]
+    Generic[Expr]: Generic.Aux[Expr, Add :+: Val :+: Var.type :+: CNil]
+    Generic[Var.type]: Generic.Aux[Var.type, HNil]
     Generic[Val]: Generic.Aux[Val, Int :*: HNil]
     Generic[Add]: Generic.Aux[Add, Expr :*: Expr :*: HNil]
 
-    assertGeneric[Expr](Zero)
+    assertGeneric[Expr](Var)
     assertGeneric[Expr](v1)
     assertGeneric[Expr](v2)
     assertGeneric[Expr](add)
-    assertGeneric(Zero)
+    assertGeneric(Var)
     assertGeneric(v1)
     assertGeneric(v2)
     assertGeneric(add)

@@ -5,9 +5,9 @@ package higher
 import minitest._
 
 object Generic1Suite extends SimpleTestSuite {
-  sealed trait MyList[A]
-  case class MyNil[A]() extends MyList[A]
-  case class MyCons[A](head: A, tail: MyList[A]) extends MyList[A]
+  sealed abstract class MyList[+A]
+  case class MyNil[+A] private () extends MyList[A]
+  case class MyCons[+A](head: A, tail: MyList[A]) extends MyList[A]
 
   sealed trait MyEither[A, B]
   case class MyLeft[A, B](left: A) extends MyEither[A, B]
@@ -36,9 +36,8 @@ object Generic1Suite extends SimpleTestSuite {
     val left = MyLeft[String, Int]("foo")
     val right = MyRight[String, Int](1)
 
-    Generic1[MyEither[String, *]]: Generic1.Aux[MyEither[String, *], Rec1[MyLeft[String, *]] :++: Rec1[
-      MyRight[String, *]
-    ] :++: CNil1]
+    type MyEitherRepr = Rec1[MyLeft[String, *]] :++: Rec1[MyRight[String, *]] :++: CNil1
+    Generic1[MyEither[String, *]]: Generic1.Aux[MyEither[String, *], MyEitherRepr]
     Generic1[MyLeft[String, *]]: Generic1.Aux[MyLeft[String, *], Const1[String] :**: HNil1]
     Generic1[MyRight[String, *]]: Generic1.Aux[MyRight[String, *], Param1 :**: HNil1]
 
@@ -49,5 +48,22 @@ object Generic1Suite extends SimpleTestSuite {
 
     assertEquals(Functor[MyEither[String, *]].map(left)(_ + 1), left)
     assertEquals(Functor[MyEither[String, *]].map(right)(_ + 1), MyRight(2))
+  }
+
+  test("scala.util.Either") {
+    val left = Left[String, Int]("foo")
+    val right = Right[String, Int](1)
+
+    Generic1[Either[String, *]]: Generic1.Aux[Either[String, *], Rec1[Left[String, *]] :++: Rec1[Right[String, *]] :++: CNil1]
+    Generic1[Left[String, *]]: Generic1.Aux[Left[String, *], Const1[String] :**: HNil1]
+    Generic1[Right[String, *]]: Generic1.Aux[Right[String, *], Param1 :**: HNil1]
+
+    assertGeneric1[Either[String, *], Int](left)
+    assertGeneric1[Either[String, *], Int](right)
+    assertGeneric1(left)
+    assertGeneric1(right)
+
+    assertEquals(Functor[Either[String, *]].map(left)(_ + 1), left)
+    assertEquals(Functor[Either[String, *]].map(right)(_ + 1), Right(2))
   }
 }

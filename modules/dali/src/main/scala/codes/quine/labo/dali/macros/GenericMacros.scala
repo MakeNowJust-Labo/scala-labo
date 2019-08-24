@@ -40,24 +40,22 @@ class GenericMacros(val c: whitebox.Context) {
     t.typeSymbol.isClass && (type2classSymbol(t).isCaseClass || type2classSymbol(t).isModuleClass)
 
   def isCoproduct(t: Type): Boolean =
-    t.typeSymbol.isClass && type2classSymbol(t).isSealed && type2classSymbol(t).knownDirectSubclasses
-      .forall(isCoproductChild(t, _))
+    t.typeSymbol.isClass && type2classSymbol(t).isSealed &&
+      type2classSymbol(t).knownDirectSubclasses.forall(isCoproductChild(t, _))
 
-  def isCoproductChild(t: Type, childSymbol: Symbol): Boolean = {
+  def isCoproductChild(t: Type, symbol: Symbol): Boolean = {
     val parentTypeCons = t.typeConstructor
 
-    val childTypeCons = symbol2type(childSymbol).typeConstructor
+    val childTypeCons = symbol2type(symbol).typeConstructor
     if (childTypeCons.typeParams.size != parentTypeCons.typeParams.size) {
       return false
     }
 
     val parentSymbol = parentTypeCons.typeSymbol
-    parentTypeCons.typeParams.zip(childTypeCons.typeParams).forall {
-      case (parentParam, childParam) =>
-        val parentParamType = symbol2type(parentParam)
-        val childParamType = symbol2type(childParam)
-        parentParamType.asSeenFrom(internal.thisType(childSymbol), parentSymbol) =:= childParamType
-    }
+    val childSymbol = childTypeCons.typeSymbol
+
+    val appliedParams = c.internal.thisType(childSymbol).baseType(parentSymbol).typeArgs.map(_.typeSymbol)
+    appliedParams.zip(childTypeCons.typeParams).forall { case (x, y) => x == y }
   }
 
   def isHigherKind(typeCons: Type): Boolean =
@@ -68,6 +66,11 @@ class GenericMacros(val c: whitebox.Context) {
       case symbol: TermSymbol if symbol.isCaseAccessor && symbol.isGetter =>
         (symbol.name.toTermName, symbol.typeSignatureIn(t).finalResultType)
     }
+
+  def childrenOf(t: Type): List[Type] =
+    t.typeSymbol.asClass.knownDirectSubclasses.toList
+      .sortBy(_.fullName)
+      .map(child => appliedType(child.asType.toType, t.typeArgs))
 
   def hasParamType(t: Type, paramType: Type): Boolean =
     t =:= paramType || t.typeArgs.nonEmpty && t.typeArgs.forall(hasParamType(_, paramType))
@@ -143,10 +146,7 @@ class GenericMacros(val c: whitebox.Context) {
   }
 
   def materializeCoproduct(t: Type): Tree = {
-    val children =
-      t.typeSymbol.asClass.knownDirectSubclasses.toList
-        .sortBy(_.fullName)
-        .map(child => appliedType(child.asType.toType, t.typeArgs))
+    val children = childrenOf(t)
 
     val reprType = children.foldRight(tq"_root_.codes.quine.labo.dali.CNil": Tree) {
       case (t, acc) => tq"_root_.codes.quine.labo.dali.:+:[$t, $acc]"
@@ -231,10 +231,7 @@ class GenericMacros(val c: whitebox.Context) {
   }
 
   def materializeCoproduct1(typeCons: Type, paramType: Type, typeA: Type): Tree = {
-    val children =
-      typeA.typeSymbol.asClass.knownDirectSubclasses.toList
-        .sortBy(_.fullName)
-        .map(t => appliedType(t.asType.toType, typeA.typeArgs))
+    val children = childrenOf(typeA)
 
     val reprs = children.map { t =>
       val lambdaTypeName = TypeName(c.freshName("Λ$"))
