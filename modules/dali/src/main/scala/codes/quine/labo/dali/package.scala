@@ -1,3 +1,4 @@
 package codes.quine.labo
+package dali
 
-package object dali extends HList.ToHlistOps
+object `package` extends HList.ToHlistOps
