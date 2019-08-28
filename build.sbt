@@ -32,8 +32,8 @@ lazy val root = project
     addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
     libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full)
   )
-  .dependsOn(neko, free, dali)
-  .aggregate(neko, free, dali)
+  .dependsOn(neko, free, dali, daliCats)
+  .aggregate(neko, free, dali, daliCats)
 
 lazy val neko = project
   .in(file("modules/neko"))
@@ -62,7 +62,20 @@ lazy val dali = project
   .settings(
     name := "dali",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "io.monix" %% "minitest" % "2.6.0" % "test",
+    libraryDependencies += "io.monix" %% "minitest" % "2.6.0" % Test,
     testFrameworks += new TestFramework("minitest.runner.Framework"),
     commonSettings
   )
+
+lazy val daliCats = project
+  .in(file("modules/dali-cats"))
+  .settings(
+    name := "dali-cats",
+    libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0-RC1",
+    libraryDependencies += "org.typelevel" %% "cats-laws" % "2.0.0-RC1" % Test,
+    libraryDependencies += "io.monix" %% "minitest" % "2.6.0" % Test,
+    libraryDependencies += "io.monix" %% "minitest-laws" % "2.6.0" % Test,
+    testFrameworks += new TestFramework("minitest.runner.Framework"),
+    commonSettings
+  )
+  .dependsOn(dali)
