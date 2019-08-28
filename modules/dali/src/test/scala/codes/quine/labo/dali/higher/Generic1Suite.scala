@@ -66,4 +66,12 @@ object Generic1Suite extends SimpleTestSuite {
     assertEquals(Functor[Either[String, *]].map(left)(_ + 1), left)
     assertEquals(Functor[Either[String, *]].map(right)(_ + 1), Right(2))
   }
+
+  test("Lambda[A => (A, Map[Int, A])]") {
+    type Foo[A] = (A, Map[Int, A])
+
+    Generic1[Foo]: Generic1.Aux[Foo, Param1 :**: Rec1[Map[Int, *]] :**: HNil1]
+
+    assertGeneric1[Foo, Int]((1, Map(1 -> 2)))
+  }
 }

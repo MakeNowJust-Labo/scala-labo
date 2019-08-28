@@ -73,7 +73,7 @@ class GenericMacros(val c: whitebox.Context) {
       .map(child => appliedType(child.asType.toType, t.typeArgs))
 
   def hasParamType(t: Type, paramType: Type): Boolean =
-    t =:= paramType || t.typeArgs.nonEmpty && t.typeArgs.forall(hasParamType(_, paramType))
+    t =:= paramType || t.typeArgs.exists(hasParamType(_, paramType))
 
   def replaceParamType(t: Type, paramType: Type, to: TypeName): Tree =
     if (t =:= paramType) tq"$to"
