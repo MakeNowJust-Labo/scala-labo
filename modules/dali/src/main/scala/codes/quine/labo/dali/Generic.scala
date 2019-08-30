@@ -1,7 +1,7 @@
 package codes.quine.labo
 package dali
 
-import macros.GenericMacros
+import macros._
 
 trait Generic[A] {
   type Repr

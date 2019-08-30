@@ -14,7 +14,7 @@ object GenericSuite extends SimpleTestSuite {
   def assertGeneric[A: Generic](a: A): Unit =
     assertEquals(Generic[A].project(Generic[A].embed(a)), a)
 
-  test("Expr") {
+  test("Generic: Expr") {
     val v1 = Val(1)
     val v2 = Val(2)
     val add = Add(v1, v2)
@@ -34,7 +34,7 @@ object GenericSuite extends SimpleTestSuite {
     assertGeneric(add)
   }
 
-  test("MyList") {
+  test("Generic: MyList") {
     val nil = MyNil[Int]
     val cons = MyCons(1, nil)
     val listCons = MyCons(List(1, 2), MyNil[List[Int]])
@@ -52,7 +52,7 @@ object GenericSuite extends SimpleTestSuite {
     assertGeneric(listCons)
   }
 
-  test("TupleN") {
+  test("Generic: Unit, Tuple2, Tuple3") {
     assertGeneric(())
     assertGeneric((1, "foo"))
     assertGeneric((1, "foo", 3))

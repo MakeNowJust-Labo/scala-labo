@@ -4,13 +4,13 @@ package macros
 
 import scala.reflect.macros.whitebox
 
-class GenericMacros(val c: whitebox.Context) {
+class GenericMacros(private[dali] val c: whitebox.Context) {
   import c.universe._
 
-  def abort(message: String): Nothing =
+  private[this] def abort(message: String): Nothing =
     c.abort(c.enclosingPosition, message)
 
-  def type2classSymbol(t: Type): ClassSymbol = {
+  private[this] def type2classSymbol(t: Type): ClassSymbol = {
     val symbol = t.typeSymbol
     if (!symbol.isClass) {
       abort(s"$symbol is not a class or trait")
@@ -21,7 +21,7 @@ class GenericMacros(val c: whitebox.Context) {
     classSymbol
   }
 
-  def symbol2type(symbol: Symbol): Type = {
+  private[this] def symbol2type(symbol: Symbol): Type = {
     if (!symbol.isType) {
       abort(s"$symbol is not type")
     }
@@ -30,20 +30,20 @@ class GenericMacros(val c: whitebox.Context) {
     symbol.asType.toType
   }
 
-  val hlistType: Type = typeOf[HList]
-  val coproductType: Type = typeOf[Coproduct]
+  private[this] val hlistType: Type = typeOf[HList]
+  private[this] val coproductType: Type = typeOf[Coproduct]
 
-  def isReprType(t: Type): Boolean =
+  private[this] def isReprType(t: Type): Boolean =
     t <:< hlistType || t <:< coproductType
 
-  def isProduct(t: Type): Boolean =
+  private[this] def isProduct(t: Type): Boolean =
     t.typeSymbol.isClass && (type2classSymbol(t).isCaseClass || type2classSymbol(t).isModuleClass)
 
-  def isCoproduct(t: Type): Boolean =
+  private[this] def isCoproduct(t: Type): Boolean =
     t.typeSymbol.isClass && type2classSymbol(t).isSealed &&
       type2classSymbol(t).knownDirectSubclasses.forall(isCoproductChild(t, _))
 
-  def isCoproductChild(t: Type, symbol: Symbol): Boolean = {
+  private[this] def isCoproductChild(t: Type, symbol: Symbol): Boolean = {
     val parentTypeCons = t.typeConstructor
 
     val childTypeCons = symbol2type(symbol).typeConstructor
@@ -58,24 +58,24 @@ class GenericMacros(val c: whitebox.Context) {
     appliedParams.zip(childTypeCons.typeParams).forall { case (x, y) => x == y }
   }
 
-  def isHigherKind(typeCons: Type): Boolean =
+  private[this] def isHigherKind(typeCons: Type): Boolean =
     typeCons.typeParams.size == 1
 
-  def fieldsOf(t: Type): List[(TermName, Type)] =
+  private[this] def fieldsOf(t: Type): List[(TermName, Type)] =
     t.decls.sorted.collect {
       case symbol: TermSymbol if symbol.isCaseAccessor && symbol.isGetter =>
         (symbol.name.toTermName, symbol.typeSignatureIn(t).finalResultType)
     }
 
-  def childrenOf(t: Type): List[Type] =
+  private[this] def childrenOf(t: Type): List[Type] =
     t.typeSymbol.asClass.knownDirectSubclasses.toList
       .sortBy(_.fullName)
       .map(child => appliedType(child.asType.toType, t.typeArgs))
 
-  def hasParamType(t: Type, paramType: Type): Boolean =
+  private[this] def hasParamType(t: Type, paramType: Type): Boolean =
     t =:= paramType || t.typeArgs.exists(hasParamType(_, paramType))
 
-  def replaceParamType(t: Type, paramType: Type, to: TypeName): Tree =
+  private[this] def replaceParamType(t: Type, paramType: Type, to: TypeName): Tree =
     if (t =:= paramType) tq"$to"
     else if (t.typeArgs.isEmpty) tq"${t.typeSymbol}"
     else tq"${t.typeSymbol}[..${t.typeArgs.map(replaceParamType(_, paramType, to))}]"
@@ -91,7 +91,7 @@ class GenericMacros(val c: whitebox.Context) {
     else abort(s"no Generic instance is available for $t")
   }
 
-  def materializeProduct(t: Type): Tree = {
+  private[this] def materializeProduct(t: Type): Tree = {
     if (type2classSymbol(t).isModuleClass) {
       return materializeSingleton(t)
     }
@@ -127,7 +127,7 @@ class GenericMacros(val c: whitebox.Context) {
     """
   }
 
-  def materializeSingleton(t: Type): Tree = {
+  private[this] def materializeSingleton(t: Type): Tree = {
     val singleton = t match {
       case SingleType(_, symbol) => symbol
       case _                     => abort(s"BUG: $t is not singleton")
@@ -145,7 +145,7 @@ class GenericMacros(val c: whitebox.Context) {
     """
   }
 
-  def materializeCoproduct(t: Type): Tree = {
+  private[this] def materializeCoproduct(t: Type): Tree = {
     val children = childrenOf(t)
 
     val reprType = children.foldRight(tq"_root_.codes.quine.labo.dali.CNil": Tree) {
@@ -170,7 +170,7 @@ class GenericMacros(val c: whitebox.Context) {
   def materialize1[F[_], R <: higher.TypeFunction1](implicit F: WeakTypeTag[F[_]]): Tree = {
     val typeCons = weakTypeOf[F[_]].typeConstructor
     if (!isHigherKind(typeCons)) {
-      abort(s"no Generic1 instance is available for non * -> * kind type")
+      abort(s"no Generic1 instance is available for not * -> * kind type")
     }
 
     val param = typeCons.typeParams.head
@@ -183,7 +183,7 @@ class GenericMacros(val c: whitebox.Context) {
     else abort(s"no Generic1 instance is available for $typeCons")
   }
 
-  def materializeProduct1(typeCons: Type, paramType: Type, typeA: Type): Tree = {
+  private[this] def materializeProduct1(typeCons: Type, paramType: Type, typeA: Type): Tree = {
     val companion = typeA.typeSymbol.companion
 
     val fields = fieldsOf(typeA)
@@ -230,7 +230,7 @@ class GenericMacros(val c: whitebox.Context) {
     """
   }
 
-  def materializeCoproduct1(typeCons: Type, paramType: Type, typeA: Type): Tree = {
+  private[this] def materializeCoproduct1(typeCons: Type, paramType: Type, typeA: Type): Tree = {
     val children = childrenOf(typeA)
 
     val reprs = children.map { t =>

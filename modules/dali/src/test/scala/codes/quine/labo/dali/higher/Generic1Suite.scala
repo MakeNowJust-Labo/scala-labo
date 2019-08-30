@@ -16,7 +16,7 @@ object Generic1Suite extends SimpleTestSuite {
   def assertGeneric1[F[_]: Generic1, A](fa: F[A]): Unit =
     assertEquals(Generic1[F].project(Generic1[F].embed(fa)), fa)
 
-  test("MyList") {
+  test("Generic1: MyList") {
     val nil = MyNil[Int]
     val cons = MyCons(1, nil)
 
@@ -32,7 +32,7 @@ object Generic1Suite extends SimpleTestSuite {
     assertEquals(Functor[MyList].map(cons)(_ + 1), MyCons(2, MyNil[Int]))
   }
 
-  test("MyEither") {
+  test("Generic1: MyEither") {
     val left = MyLeft[String, Int]("foo")
     val right = MyRight[String, Int](1)
 
@@ -50,7 +50,7 @@ object Generic1Suite extends SimpleTestSuite {
     assertEquals(Functor[MyEither[String, *]].map(right)(_ + 1), MyRight(2))
   }
 
-  test("scala.util.Either") {
+  test("Generic1: scala.util.Either") {
     val left = Left[String, Int]("foo")
     val right = Right[String, Int](1)
 
@@ -67,7 +67,7 @@ object Generic1Suite extends SimpleTestSuite {
     assertEquals(Functor[Either[String, *]].map(right)(_ + 1), Right(2))
   }
 
-  test("Lambda[A => (A, Map[Int, A])]") {
+  test("Generic1: Lambda[A => (A, Map[Int, A])]") {
     type Foo[A] = (A, Map[Int, A])
 
     Generic1[Foo]: Generic1.Aux[Foo, Param1 :**: Rec1[Map[Int, *]] :**: HNil1]
