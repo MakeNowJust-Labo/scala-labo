@@ -80,6 +80,22 @@ class GenericMacros(private[dali] val c: whitebox.Context) {
     else if (t.typeArgs.isEmpty) tq"${t.typeSymbol}"
     else tq"${t.typeSymbol}[..${t.typeArgs.map(replaceParamType(_, paramType, to))}]"
 
+  private[this] def productRepr[A](names: List[A])(cgen: A => Tree, pgen: A => Tree): (Tree, Tree) = {
+    val cons = names.foldRight(q"_root_.codes.quine.labo.dali.HNil": Tree) {
+      case (name, acc) => q"_root_.codes.quine.labo.dali.:*:(${cgen(name)}, $acc)"
+    }
+    val pattern = names.foldRight(pq"_root_.codes.quine.labo.dali.HNil": Tree) {
+      case (name, acc) => pq"_root_.codes.quine.labo.dali.:*:(${pgen(name)}, $acc)"
+    }
+
+    (cons, pattern)
+  }
+
+  private[this] def productReprType(types: List[Tree]): Tree =
+    types.foldRight(tq"_root_.codes.quine.labo.dali.HNil": Tree) {
+      case (t, acc) => tq"_root_.codes.quine.labo.dali.:*:[$t, $acc]"
+    }
+
   def materialize[A: WeakTypeTag, R]: Tree = {
     val t = weakTypeOf[A]
     if (isReprType(t)) {
@@ -100,20 +116,13 @@ class GenericMacros(private[dali] val c: whitebox.Context) {
     val companion = symbol.companion
 
     val fields = fieldsOf(t)
-    val elems = fields.map { case (name, t) => (TermName(c.freshName("pattern$")), t) }
+    val names = fields.map(_ => TermName(c.freshName("pattern$")))
 
-    val cons = q"$companion(..${elems.map(_._1)})"
-    val pattern = pq"$companion(..${elems.map { case (name, _) => pq"$name" }})"
+    val cons = q"$companion(..$names)"
+    val pattern = pq"$companion(..${names.map(name => pq"$name")})"
 
-    val reprCons = elems.foldRight(q"_root_.codes.quine.labo.dali.HNil": Tree) {
-      case ((name, _), acc) => q"_root_.codes.quine.labo.dali.:*:($name, $acc)"
-    }
-    val reprPattern = elems.foldRight(pq"_root_.codes.quine.labo.dali.HNil": Tree) {
-      case ((name, _), acc) => pq"_root_.codes.quine.labo.dali.:*:($name, $acc)"
-    }
-    val reprType = elems.foldRight(tq"_root_.codes.quine.labo.dali.HNil": Tree) {
-      case ((_, t), acc) => tq"_root_.codes.quine.labo.dali.:*:[$t, $acc]"
-    }
+    val (reprCons, reprPattern) = productRepr(names)(name => q"$name", name => pq"$name")
+    val reprType = productReprType(fields.map { case (_, t) => tq"$t" })
 
     val argName = TermName(c.freshName("arg$"))
     val className = TypeName(c.freshName("Product$"))
@@ -167,6 +176,106 @@ class GenericMacros(private[dali] val c: whitebox.Context) {
     """
   }
 
+  def materializeLabelled[A: WeakTypeTag, L <: String with Singleton, R]: Tree = {
+    val t = weakTypeOf[A]
+    if (isReprType(t)) {
+      abort("no LabelledGeneric instance available for HList or Coproduct")
+    }
+
+    if (isProduct(t)) materializeLabelledProduct(t)
+    else if (isCoproduct(t)) materializeLabelledCoproduct(t)
+    else abort(s"no LabelledGeneric instance is available for $t")
+  }
+
+  private[this] def materializeLabelledProduct(t: Type): Tree = {
+    if (type2classSymbol(t).isModuleClass) {
+      return materializeLabelledSingleton(t)
+    }
+
+    val symbol = t.typeSymbol
+    val companion = symbol.companion
+
+    val fields = fieldsOf(t)
+    val elems = fields.map {
+      case (name, t) =>
+        val nameType = c.internal.constantType(Constant(name.toString))
+        (nameType, TermName(c.freshName("pattern$")), t)
+    }
+
+    val cons = q"$companion(..${elems.map(_._2)})"
+    val pattern = pq"$companion(..${elems.map { case (_, name, _) => pq"$name" }})"
+
+    val (reprCons, reprPattern) = productRepr(elems)(
+      { case (labelType, name, _) => q"_root_.codes.quine.labo.dali.Labelled[$labelType]($name)" },
+      { case (_, name, _)         => pq"_root_.codes.quine.labo.dali.Labelled($name)" }
+    )
+
+    val reprType = productReprType(
+      elems.map { case (labelType, _, t) => tq"_root_.codes.quine.labo.dali.Labelled[$labelType, $t]" }
+    )
+
+    val labelType = c.internal.constantType(Constant(t.typeSymbol.name.toString))
+    val argName = TermName(c.freshName("arg$"))
+    val className = TypeName(c.freshName("LabelledProduct$"))
+    return q"""
+      final class $className extends _root_.codes.quine.labo.dali.LabelledGeneric[$t] {
+        type Repr = $reprType
+        def embed($argName: $t): Repr = $argName match { case $pattern => $reprCons }
+        def project($argName: Repr): $t = $argName match { case $reprPattern => $cons }
+        type Label = $labelType
+      }
+      new $className: _root_.codes.quine.labo.dali.LabelledGeneric.Aux[$t, $labelType, $reprType]
+    """
+  }
+
+  private[this] def materializeLabelledSingleton(t: Type): Tree = {
+    val singleton = t match {
+      case SingleType(_, symbol) => symbol
+      case _                     => abort(s"BUG: $t is not singleton")
+    }
+
+    val labelType = c.internal.constantType(Constant(t.typeSymbol.name.toString))
+    val argName = TermName(c.freshName("arg$"))
+    val className = TypeName(c.freshName("LabelledSingleton$"))
+    q"""
+      final class $className extends _root_.codes.quine.labo.dali.LabelledGeneric[$t] {
+        type Repr = _root_.codes.quine.labo.dali.HNil
+        def embed($argName: $t): Repr = _root_.codes.quine.labo.dali.HNil
+        def project($argName: Repr): $t = $singleton
+        type Label = $labelType
+      }
+      new $className: _root_.codes.quine.labo.dali.LabelledGeneric.Aux[$t, $labelType, _root_.codes.quine.labo.dali.HNil]
+    """
+  }
+
+  private[this] def materializeLabelledCoproduct(t: Type): Tree = {
+    val children = childrenOf(t)
+
+    val reprType = children.foldRight(tq"_root_.codes.quine.labo.dali.CNil": Tree) {
+      case (t, acc) =>
+        val labelType = c.internal.constantType(Constant(t.typeSymbol.name.toString))
+        tq"_root_.codes.quine.labo.dali.:+:[_root_.codes.quine.labo.dali.Labelled[$labelType, $t], $acc]"
+    }
+    val cases = children.zipWithIndex.map { case (t, i) => cq"_: $t => $i" }
+
+    val labelType = c.internal.constantType(Constant(t.typeSymbol.name.toString))
+    val argName = TermName(c.freshName("arg$"))
+    val className = TypeName(c.freshName("LabelledCoproduct$"))
+    q"""
+      final class $className extends _root_.codes.quine.labo.dali.LabelledGeneric[$t] {
+        type Repr = $reprType
+        def embed($argName: $t): Repr =
+          _root_.codes.quine.labo.dali.Coproduct.unsafeApply($argName match { case ..$cases }, Labelled[String with Singleton]($argName)).asInstanceOf[Repr]
+        def project($argName: Repr): $t =
+          _root_.codes.quine.labo.dali.Coproduct.unsafeGet($argName)
+            .asInstanceOf[_root_.codes.quine.labo.dali.Labelled[_root_.java.lang.String with _root_.scala.Singleton, $t]]
+            .value
+        type Label = $labelType
+      }
+      new $className: _root_.codes.quine.labo.dali.LabelledGeneric.Aux[$t, $labelType, $reprType]
+    """
+  }
+
   def materialize1[F[_], R <: higher.TypeFunction1](implicit F: WeakTypeTag[F[_]]): Tree = {
     val typeCons = weakTypeOf[F[_]].typeConstructor
     if (!isHigherKind(typeCons)) {
@@ -187,30 +296,25 @@ class GenericMacros(private[dali] val c: whitebox.Context) {
     val companion = typeA.typeSymbol.companion
 
     val fields = fieldsOf(typeA)
-    val elems = fields.map { case (name, t) => (TermName(c.freshName("pattern$")), t) }
+    val names = fields.map { case (name, t) => TermName(c.freshName("pattern$")) }
 
-    val reprs = elems.map {
-      case (name, t) if t =:= paramType => (name, tq"_root_.codes.quine.labo.dali.higher.Param1")
-      case (name, t) if hasParamType(t, paramType) =>
+    val cons = q"$companion(..$names)"
+    val pattern = pq"$companion(..${names.map(name => pq"$name")})"
+
+    val (reprCons, reprPattern) = productRepr(names)(name => q"$name", name => pq"$name")
+
+    val reprTypes = fields.map {
+      case (_, t) if t =:= paramType => tq"_root_.codes.quine.labo.dali.higher.Param1"
+      case (_, t) if hasParamType(t, paramType) =>
         val lambdaTypeName = TypeName(c.freshName("Lambda$"))
         val newParamName = TypeName(c.freshName("A$"))
         val t1 = replaceParamType(t, paramType, newParamName)
         val lambda = tq"{type $lambdaTypeName[$newParamName] = $t1}"
-        (name, tq"_root_.codes.quine.labo.dali.higher.Rec1[($lambda)#$lambdaTypeName]")
-      case (name, t) => (name, tq"_root_.codes.quine.labo.dali.higher.Const1[$t]")
+        tq"_root_.codes.quine.labo.dali.higher.Rec1[($lambda)#$lambdaTypeName]"
+      case (_, t) => tq"_root_.codes.quine.labo.dali.higher.Const1[$t]"
     }
-
-    val cons = q"$companion(..${elems.map(_._1)})"
-    val pattern = pq"$companion(..${elems.map { case (name, _) => pq"$name" }})"
-
-    val reprCons = reprs.foldRight(q"_root_.codes.quine.labo.dali.HNil": Tree) {
-      case ((name, _), acc) => q"_root_.codes.quine.labo.dali.:*:($name, $acc)"
-    }
-    val reprPattern = reprs.foldRight(pq"_root_.codes.quine.labo.dali.HNil": Tree) {
-      case ((name, _), acc) => pq"_root_.codes.quine.labo.dali.:*:($name, $acc)"
-    }
-    val reprType = reprs.foldRight(tq"_root_.codes.quine.labo.dali.higher.HNil1": Tree) {
-      case ((_, t), acc) => tq"_root_.codes.quine.labo.dali.higher.:**:[$t, $acc]"
+    val reprType = reprTypes.foldRight(tq"_root_.codes.quine.labo.dali.higher.HNil1": Tree) {
+      case (t, acc) => tq"_root_.codes.quine.labo.dali.higher.:**:[$t, $acc]"
     }
 
     val argName = TermName(c.freshName("a$"))

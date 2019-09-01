@@ -1,16 +1,11 @@
 package codes.quine.labo
 package dali
 
-import minitest._
+import data._
+
+import minitest.SimpleTestSuite
 
 object GenericSuite extends SimpleTestSuite {
-  import higher.Generic1Suite.{MyCons, MyList, MyNil}
-
-  sealed trait Expr
-  object Var extends Expr
-  case class Val(x: Int) extends Expr
-  case class Add(l: Expr, r: Expr) extends Expr
-
   def assertGeneric[A: Generic](a: A): Unit =
     assertEquals(Generic[A].project(Generic[A].embed(a)), a)
 
@@ -56,5 +51,11 @@ object GenericSuite extends SimpleTestSuite {
     assertGeneric(())
     assertGeneric((1, "foo"))
     assertGeneric((1, "foo", 3))
+  }
+
+  test("Generic: (Int, Map[Int, List[Int]])") {
+    type Foo = (Int, Map[Int, List[Int]])
+    Generic[Foo]: Generic.Aux[Foo, Int :*: Map[Int, List[Int]] :*: HNil]
+    assertGeneric((1, Map(2 -> List(3))))
   }
 }

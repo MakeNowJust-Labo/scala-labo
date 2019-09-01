@@ -1,6 +1,8 @@
 package codes.quine.labo
 package dali
-package higher
+package data
+
+import higher._
 
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(a: A => B): F[B]

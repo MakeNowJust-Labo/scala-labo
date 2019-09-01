@@ -23,6 +23,8 @@ case class MyNil[A]() extends MyList[A]
 case class MyCons[A](head: A, tail: MyList[A]) extends MyList[A]
 
 object MyList {
+  def apply[A](vs: A*): MyList[A] = fromList(vs.toList)
+
   def fromList[A](l: List[A]): MyList[A] =
     l.foldRight(MyNil[A]: MyList[A])(MyCons(_, _))
 

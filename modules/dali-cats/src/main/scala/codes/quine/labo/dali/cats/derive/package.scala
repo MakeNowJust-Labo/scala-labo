@@ -3,6 +3,8 @@ package dali
 package cats
 package derive
 
+package object show extends DeriveShow
+
 package object alternative extends DeriveAlternative
 package object applicative extends DeriveApplicative
 package object apply extends DeriveApply

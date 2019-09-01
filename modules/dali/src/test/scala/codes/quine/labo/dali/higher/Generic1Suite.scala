@@ -2,17 +2,11 @@ package codes.quine.labo
 package dali
 package higher
 
-import minitest._
+import data._
+
+import minitest.SimpleTestSuite
 
 object Generic1Suite extends SimpleTestSuite {
-  sealed abstract class MyList[+A]
-  case class MyNil[+A] private () extends MyList[A]
-  case class MyCons[+A](head: A, tail: MyList[A]) extends MyList[A]
-
-  sealed trait MyEither[A, B]
-  case class MyLeft[A, B](left: A) extends MyEither[A, B]
-  case class MyRight[A, B](right: B) extends MyEither[A, B]
-
   def assertGeneric1[F[_]: Generic1, A](fa: F[A]): Unit =
     assertEquals(Generic1[F].project(Generic1[F].embed(fa)), fa)
 

@@ -1,7 +1,7 @@
 package codes.quine.labo
 package dali
 
-import minitest._
+import minitest.SimpleTestSuite
 
 object CoproductSuite extends SimpleTestSuite {
   test("Coproduct: construction") {
