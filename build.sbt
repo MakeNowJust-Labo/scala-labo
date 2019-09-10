@@ -75,7 +75,7 @@ lazy val daliCats = project
     libraryDependencies += "org.typelevel" %% "cats-laws" % "2.0.0-RC1" % Test,
     libraryDependencies += "io.monix" %% "minitest" % "2.6.0" % Test,
     libraryDependencies += "io.monix" %% "minitest-laws" % "2.6.0" % Test,
-    testFrameworks += new TestFramework("minitest.runner.Framework"),
+    testFrameworks += new TestFramework("codes.quine.labo.dali.cats.Framework"),
     commonSettings
   )
   .dependsOn(dali)
