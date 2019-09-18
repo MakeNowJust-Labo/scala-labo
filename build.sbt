@@ -15,7 +15,8 @@ val commonSettings = Seq(
   Compile / console / scalacOptions += "-Ywarn-unused:-imports,_",
   Test / console / scalacOptions += "-Ywarn-unused:-imports,_",
   Compile / doc / scalacOptions ++= Seq("-diagrams", "-diagrams-max-classes", "10"),
-  resolvers += Resolver.sonatypeRepo("releases"),
+  // resolvers += Resolver.sonatypeRepo("releases"),
+  // resolvers += Resolver.sonatypeRepo("snapshots"),
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0"),
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
 )
@@ -26,6 +27,8 @@ lazy val root = project
     name := "labo",
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0-RC1",
     libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3",
+    libraryDependencies += "codes.quine" %% "dali-core" % "0.1.0",
+    libraryDependencies += "codes.quine" %% "dali-cats" % "0.1.0",
     scalapropsSettings,
     scalapropsVersion := "0.6.0",
     commonSettings,
