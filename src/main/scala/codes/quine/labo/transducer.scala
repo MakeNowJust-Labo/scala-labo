@@ -40,7 +40,7 @@ object Reducer {
     def init: Option[A] = None
     def step(s: Option[A], a: A): Option[A] =
       s match {
-        case None => Some(a)
+        case None       => Some(a)
         case r: Some[A] => r
       }
     def complete(s: Option[A]): Option[A] = s
