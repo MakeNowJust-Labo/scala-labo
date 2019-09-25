@@ -1,7 +1,6 @@
 package codes.quine.labo
 
 import scalaprops._
-import fun._
 
 import neko._, data._, instances._, laws._, props._, syntax._
 

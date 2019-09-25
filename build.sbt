@@ -30,27 +30,28 @@ lazy val root = project
     libraryDependencies += "codes.quine" %% "dali-core" % "0.1.0",
     libraryDependencies += "codes.quine" %% "dali-cats" % "0.1.0",
     scalapropsSettings,
-    scalapropsVersion := "0.6.0",
-    commonSettings,
+    scalapropsVersion := "0.6.1",
+    test := {}, // don't need to run tests here.
     addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
-    libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full)
+    libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full),
+    commonSettings,
   )
-  .dependsOn(neko, free)
-  .aggregate(neko, free)
+  .dependsOn(nekoCore, nekoFree)
+  .aggregate(nekoCore, nekoFree)
 
-lazy val neko = project
-  .in(file("modules/neko"))
+lazy val nekoCore = project
+  .in(file("modules/neko-core"))
   .settings(
-    name := "neko",
+    name := "neko-core",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.0",
     scalapropsSettings,
-    scalapropsVersion := "0.6.0",
+    scalapropsVersion := "0.6.1",
     commonSettings
   )
 
-lazy val free = project
+lazy val nekoFree = project
   .in(file("modules/neko-free"))
   .settings(
     name := "neko-free",
@@ -58,4 +59,4 @@ lazy val free = project
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     commonSettings
   )
-  .dependsOn(neko)
+  .dependsOn(nekoCore)
