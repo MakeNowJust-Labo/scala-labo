@@ -24,7 +24,7 @@ object Coyoneda {
     def k: A => A = identity
   }
 
-  implicit def CoyonedaFunctor[F[_]]: Functor[Coyoneda[F, ?]] = new Functor[Coyoneda[F, ?]] {
+  implicit def coyonedaFunctorInstance[F[_]]: Functor[Coyoneda[F, *]] = new Functor[Coyoneda[F, *]] {
     def map[A, B](fa: Coyoneda[F, A])(f: A => B): Coyoneda[F, B] = new Coyoneda[F, B] {
       type I = fa.I
       def fi: F[I] = fa.fi

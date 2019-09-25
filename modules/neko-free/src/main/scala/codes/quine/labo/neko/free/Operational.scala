@@ -14,7 +14,7 @@ case class Operational[F[_], A](free: Free[Coyoneda[F, ?], A]) {
 object Operational {
   def lift[F[_], A](fa: F[A]) = Operational(Free.lift(Coyoneda.lift(fa)))
 
-  implicit def OperationalMonad[F[_]]: Monad[Operational[F, ?]] = new Monad[Operational[F, ?]] {
+  implicit def operationalMonadInstance[F[_]]: Monad[Operational[F, *]] = new Monad[Operational[F, *]] {
     def pure[A](a: A): Operational[F, A] = Operational(Pure(a))
 
     override def flatMap[A, B](fa: Operational[F, A])(f: A => Operational[F, B]): Operational[F, B] =

@@ -31,7 +31,6 @@ lazy val root = project
     libraryDependencies += "codes.quine" %% "dali-cats" % "0.1.0",
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
-    test := {}, // don't need to run tests here.
     addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
     libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full),
     commonSettings,
@@ -45,7 +44,7 @@ lazy val nekoCore = project
     name := "neko-core",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
-    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.0",
+    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.1",
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
     commonSettings

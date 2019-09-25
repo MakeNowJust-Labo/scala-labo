@@ -1,4 +1,12 @@
+// This file provides lazy shrinkable function representation for Scalaprops.
+//
+// In other words, it is port of Haskell's Test.QuickCheck.Function in Scala.
+// http://hackage.haskell.org/package/QuickCheck-2.13.2/docs/Test-QuickCheck-Function.html
+//
+// Working example can be seen at test/scala/codes/quine/labo/fun/FunProps.scala
+
 package codes.quine.labo
+package fun
 
 import com.github.ghik.silencer.silent
 import java.nio.ByteBuffer
@@ -6,6 +14,21 @@ import scalaprops.{Cogen, Gen, Shrink}
 import scala.reflect.ClassTag
 import scala.util.chaining._
 import simulacrum.typeclass
+
+final class Lazy[A] private (private[this] var thunk: () => A) {
+  lazy val value = {
+    val a = thunk()
+    thunk = null
+    a
+  }
+
+  override def toString: String =
+    if (thunk == null) value.toString else "<not computed>"
+}
+
+object Lazy {
+  def apply[A](value: => A): Lazy[A] = new Lazy(value _)
+}
 
 sealed abstract class PartialFun[A, B] {
   def isEmpty: Boolean

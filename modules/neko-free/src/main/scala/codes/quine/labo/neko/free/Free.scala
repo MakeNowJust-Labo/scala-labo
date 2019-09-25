@@ -24,7 +24,7 @@ object Free {
       case Flatten(ffa) => f(F.map(ffa)((fa: Free[F, A]) => iterate(fa)(f)))
     }
 
-  implicit def FreeMonad[F[_]](implicit F: Functor[F]): Monad[Free[F, ?]] = new Monad[Free[F, ?]] {
+  implicit def freeMonadInstance[F[_]](implicit F: Functor[F]): Monad[Free[F, *]] = new Monad[Free[F, *]] {
     def pure[A](a: A): Free[F, A] = Pure(a)
 
     override def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] =

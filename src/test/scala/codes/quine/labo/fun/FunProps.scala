@@ -1,4 +1,5 @@
 package codes.quine.labo
+package fun
 
 import scalaprops._
 
@@ -7,16 +8,16 @@ import neko._, data._, instances._, laws._, props._, syntax._
 object FunProps extends Scalaprops {
   val prop = Property.forAllS[Fun[String, Int]] {
     case Fun(_, _, _, f) => f("あいうえお") == f("かきくけこ") && f("かきくけこ") == f("さしすせそ")
-  }
+  }.ignore("it is example for Fun")
 
   val fold = Property.forAllS[(List[Int], Int), Fun[(Int, Int), Int]] {
     case ((xs, z), Fun(_, _, _, f)) =>
       xs.foldRight(z)(Function.untupled(f)) == xs.foldLeft(z)(Function.untupled(f))
-  }
+  }.ignore("it is example for Fun")
 
   val byte = Property.forAllS[Fun[(Byte, List[Byte]), Int]] {
     case Fun(_, _, _, f) => f((1, List(127, 2))) == f((2, List(2))) && f((2, List(2))) == f((1, List(1, 2, 3)))
-  }
+  }.ignore("it is example for Fun")
 
   val stateT = {
     implicit def stateTEqInstance[F[_], S, A](implicit ef: Eq[S => F[(S, A)]]): Eq[StateT[F, S, A]] = ef.by(_.run)
@@ -44,7 +45,7 @@ object FunProps extends Scalaprops {
       val fg = StateT(fg0.f.andThen(_.map(((_: Fun[Boolean, Boolean]).f).second)))
       laws.alternativeRightDistributivity(fa, ff, fg)
     }
-  }
+  }.ignore("it is example for Fun")
 
   /*
  * Small result:
