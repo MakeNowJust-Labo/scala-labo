@@ -14,6 +14,8 @@ final case class ReaderT[F[_], E, A](run: E => F[A]) {
 object ReaderT extends ReaderTInstances0 {
   def run[F[_], E, A](fa: ReaderT[F, E, A])(e: E): F[A] = fa.run(e)
 
+  def pure[F[_]: Applicative, E, A](a: A): ReaderT[F, E, A] = ReaderT(e => Applicative[F].pure(a))
+
   def ask[F[_]: Applicative, E]: ReaderT[F, E, E] = ReaderT(e => Applicative[F].pure(e))
   def local[F[_], E, A](f: E => E)(fa: ReaderT[F, E, A]): ReaderT[F, E, A] =
     ReaderT(e => fa.run(f(e)))
@@ -35,7 +37,7 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
 
   implicit def readerTApplicativeInstance[F[_]: Applicative, E]: Applicative[ReaderT[F, E, *]] =
     new Applicative[ReaderT[F, E, *]] {
-      def pure[A](a: A): ReaderT[F, E, A] = ReaderT(e => Applicative[F].pure(a))
+      def pure[A](a: A): ReaderT[F, E, A] = ReaderT.pure(a)
       override def map[A, B](fa: ReaderT[F, E, A])(f: A => B): ReaderT[F, E, B] = fa.map(f)
       def ap[A, B](ff: ReaderT[F, E, A => B])(fa: ReaderT[F, E, A]): ReaderT[F, E, B] =
         ReaderT(e => ff.run(e) <*> fa.run(e))
@@ -48,7 +50,7 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
   }
 
   implicit def readerTMonadInstance[F[_]: Monad, E]: Monad[ReaderT[F, E, *]] = new Monad[ReaderT[F, E, *]] {
-    def pure[A](a: A): ReaderT[F, E, A] = ReaderT(e => Monad[F].pure(a))
+    def pure[A](a: A): ReaderT[F, E, A] = ReaderT.pure(a)
     override def flatMap[A, B](fa: ReaderT[F, E, A])(f: A => ReaderT[F, E, B]): ReaderT[F, E, B] = fa.flatMap(f)
     override def map[A, B](fa: ReaderT[F, E, A])(f: A => B): ReaderT[F, E, B] = fa.map(f)
     def tailRecM[A, B](a: A)(f: A => ReaderT[F, E, Either[A, B]]): ReaderT[F, E, B] = ReaderT.tailRecM(a)(f)
@@ -104,7 +106,7 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
 private[data] trait ReaderTInstances1 {
   implicit def readerTAlternativeInstance[F[_]: Alternative, E]: Alternative[ReaderT[F, E, *]] =
     new Alternative[ReaderT[F, E, *]] {
-      def pure[A](a: A): ReaderT[F, E, A] = ReaderT(e => Applicative[F].pure(a))
+      def pure[A](a: A): ReaderT[F, E, A] = ReaderT.pure(a)
       override def map[A, B](fa: ReaderT[F, E, A])(f: A => B): ReaderT[F, E, B] = fa.map(f)
       def ap[A, B](ff: ReaderT[F, E, A => B])(fa: ReaderT[F, E, A]): ReaderT[F, E, B] =
         ReaderT(e => ff.run(e) <*> fa.run(e))

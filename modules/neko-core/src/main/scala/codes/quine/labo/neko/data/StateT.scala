@@ -22,6 +22,8 @@ object StateT extends StateTInstances0 {
   def exec[F[_]: Functor, S, A](fa: StateT[F, S, A])(s: S): F[S] = run(fa)(s).map(_._1)
   def eval[F[_]: Functor, S, A](fa: StateT[F, S, A])(s: S): F[A] = run(fa)(s).map(_._2)
 
+  def pure[F[_], S, A](a: A)(implicit F: Applicative[F]): StateT[F, S, A] = StateT(s => F.pure((s, a)))
+
   def get[F[_], S](implicit F: Applicative[F]): StateT[F, S, S] = StateT(s => F.pure((s, s)))
   def put[F[_], S](s: S)(implicit F: Applicative[F]): StateT[F, S, Unit] = StateT(_ => F.pure((s, ())))
   def modify[F[_], S](f: S => S)(implicit F: Applicative[F]): StateT[F, S, Unit] = StateT(s => F.pure((f(s), ())))
@@ -45,7 +47,7 @@ private[data] trait StateTInstances0 {
   }
 
   implicit def stateTMonadInstance[F[_]: Monad, S]: Monad[StateT[F, S, *]] = new Monad[StateT[F, S, *]] {
-    def pure[A](a: A): StateT[F, S, A] = StateT(s => Monad[F].pure((s, a)))
+    def pure[A](a: A): StateT[F, S, A] = StateT.pure(a)
     override def map[A, B](fa: StateT[F, S, A])(f: A => B): StateT[F, S, B] = fa.map(f)
     override def flatMap[A, B](fa: StateT[F, S, A])(f: A => StateT[F, S, B]): StateT[F, S, B] = fa.flatMap(f)
     def tailRecM[A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] = StateT.tailRecM(a)(f)

@@ -18,6 +18,6 @@ object EvalProps extends Scalaprops {
       MonoidProps[Eval[String]].all,
       BimonadProps[Eval].all[Int, Int, Int],
       DeferProps[Eval].all[Int],
-      FoldProps[Eval].all[Int, String],
+      FoldProps[Eval].all[Int, String]
     )
 }

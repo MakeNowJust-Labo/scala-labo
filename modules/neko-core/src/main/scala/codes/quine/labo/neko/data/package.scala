@@ -20,6 +20,8 @@ package object data {
     def run[E, A](fa: Reader[E, A])(e: E): A = ReaderT.run(fa)(e).value
     def apply[E, A](run: E => A): ReaderT[Id, E, A] = ReaderT(e => Id(run(e)))
 
+    def pure[E, A](a: A): Reader[E, A] = ReaderT.pure[Id, E, A](a)
+
     def ask[E]: Reader[E, E] = ReaderT.ask[Id, E]
     def local[E, A](f: E => E)(fa: Reader[E, A]): Reader[E, A] = ReaderT.local(f)(fa)
   }
@@ -41,6 +43,8 @@ package object data {
     def exec[S, A](fa: State[S, A])(s: S): S = run(fa)(s)._1
     def eval[S, A](fa: State[S, A])(s: S): A = run(fa)(s)._2
     def apply[S, A](run: S => (S, A)): State[S, A] = StateT(s => Id(run(s)))
+
+    def pure[S, A](a: A): State[S, A] = StateT.pure[Id, S, A](a)
 
     def get[S]: State[S, S] = StateT.get[Id, S]
     def put[S](s: S): State[S, Unit] = StateT.put(s)
