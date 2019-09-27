@@ -94,6 +94,22 @@ private[instances] trait ListInstances1 { self: ListInstances0 =>
     def coflatMap[A, B](fa: List[A])(f: List[A] => B): List[B] = fa.tails.toList.init.map(f)
   }
 
+  implicit val listTraverseInstance: Traverse[List] = new Traverse[List] {
+    def foldLeft[A, B](fa: List[A], b: B)(f: (B, A) => B): B = fa.foldLeft(b)(f)
+    def foldRight[A, B](fa: List[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
+      def loop(fa: List[A]): Eval[B] = fa match {
+        case Nil     => lb
+        case x :: xs => f(x, Eval.defer(loop(xs)))
+      }
+      Eval.defer(loop(fa))
+    }
+
+    def traverse[G[_]: Applicative, A, B](fa: List[A])(f: A => G[B]): G[List[B]] =
+      foldRight(fa, Eval.always(Applicative[G].pure(List.empty[B]))) { (a, lgb) =>
+        lgb.map(gb => Applicative[G].map2(f(a), gb)(_ :: _))
+      }.value
+  }
+
   implicit def listHashInstance[A: Hash]: Hash[List[A]] = new Hash[List[A]] {
     def eqv(x: List[A], y: List[A]): Boolean = self.listEqInstance[A].eqv(x, y)
     def hash(x: List[A]): Int = x.foldLeft("List".hash)(_ * 31 + _.hash)

@@ -40,6 +40,13 @@ private[data] trait IdInstances0 extends IdInstances1 {
 }
 
 private[data] trait IdInstances1 {
+  implicit val idTraverseInstance: Traverse[Id] = new Traverse[Id] {
+    def foldLeft[A, B](fa: Id[A], b: B)(f: (B, A) => B): B = f(b, fa.value)
+    def foldRight[A, B](fa: Id[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = Eval.defer(f(fa.value, lb))
+
+    def traverse[G[_]: Applicative, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] = f(fa.value).map(Id(_))
+  }
+
   implicit def idHashInstance[A: Hash]: Hash[Id[A]] = new Hash[Id[A]] {
     def eqv(x: Id[A], y: Id[A]): Boolean = x.value === y.value
     def hash(x: Id[A]): Int = "Id".hash * 31 + x.value.hash

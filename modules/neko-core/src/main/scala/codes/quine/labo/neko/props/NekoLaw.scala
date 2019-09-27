@@ -62,6 +62,18 @@ object NekoLaw {
   val deferDoesNotEvaluate: NekoLaw = law0(defer, "does not evaluate")
   val deferStackSafety: NekoLaw = law0(defer, "stack safety")
 
+  val fold: NekoLaw = law("fold")
+  val foldAll: NekoLaw = all(fold)
+  val foldFoldRightLazy: NekoLaw = law0(fold, "foldRight lazy")
+  val foldLeftConsistencyWithFoldMap: NekoLaw = law0(fold, "left consistency with foldMap")
+  val foldRightConsistencyWithFoldMap: NekoLaw = law0(fold, "right consistency with foldMap")
+
+  val traverse: NekoLaw = law("traverse")
+  val traverseAll: NekoLaw = all(traverse)
+  val traverseIdentity: NekoLaw = law0(traverse, "identity")
+  val traverseSequentialComposition: NekoLaw = law0(traverse, "sequential composition")
+  val traverseParallelComposition: NekoLaw = law0(traverse, "parallel composition")
+
   val functor: NekoLaw = law("functor")
   val functorAll: NekoLaw = all(functor)
   val functorIdentity: NekoLaw = law0(functor, "identity")

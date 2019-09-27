@@ -15,6 +15,7 @@ trait AllSyntax
     with Defer.ToDeferOps
     with Eq.ToEqOps
     with FlatMap.ToFlatMapOps
+    with Fold.ToFoldOps
     with Functor.ToFunctorOps
     with Hash.ToHashOps
     with Monad.ToMonadOps
@@ -26,5 +27,6 @@ trait AllSyntax
     with Semigroup.ToSemigroupOps
     with SemigroupK.ToSemigroupKOps
     with Strong.ToStrongOps
+    with Traverse.ToTraverseOps
 
 object syntax extends AllSyntax

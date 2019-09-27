@@ -91,6 +91,22 @@ private[instances] trait VectorInstances1 { self: VectorInstances0 =>
     def coflatMap[A, B](fa: Vector[A])(f: Vector[A] => B): Vector[B] = fa.tails.toVector.init.map(f)
   }
 
+  implicit val vectorTraverseInstance: Traverse[Vector] = new Traverse[Vector] {
+    def foldLeft[A, B](fa: Vector[A], b: B)(f: (B, A) => B): B = fa.foldLeft(b)(f)
+    def foldRight[A, B](fa: Vector[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
+      def loop(fa: Vector[A]): Eval[B] = fa match {
+        case Vector() => lb
+        case x +: xs  => f(x, Eval.defer(loop(xs)))
+      }
+      Eval.defer(loop(fa))
+    }
+
+    def traverse[G[_]: Applicative, A, B](fa: Vector[A])(f: A => G[B]): G[Vector[B]] =
+      foldRight(fa, Eval.always(Applicative[G].pure(Vector.empty[B]))) { (a, lgb) =>
+        lgb.map(gb => Applicative[G].map2(f(a), gb)(_ +: _))
+      }.value
+  }
+
   implicit def vectorHashInstance[A: Hash]: Hash[Vector[A]] = new Hash[Vector[A]] {
     def eqv(x: Vector[A], y: Vector[A]): Boolean = self.vectorEqInstance[A].eqv(x, y)
     def hash(x: Vector[A]): Int = x.foldLeft("Vector".hash)(_ * 31 + _.hash)
