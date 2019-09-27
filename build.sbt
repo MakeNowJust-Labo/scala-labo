@@ -29,6 +29,8 @@ lazy val root = project
     libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3",
     libraryDependencies += "codes.quine" %% "dali-core" % "0.1.0",
     libraryDependencies += "codes.quine" %% "dali-cats" % "0.1.0",
+    libraryDependencies += "io.monix" %% "minitest" % "2.7.0" % Test,
+    testFrameworks += new TestFramework("minitest.runner.Framework"),
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
     addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
