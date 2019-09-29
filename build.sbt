@@ -27,6 +27,7 @@ lazy val root = project
     name := "labo",
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0",
     libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3",
+    libraryDependencies += "eu.timepit" %% "singleton-ops" % "0.4.0",
     libraryDependencies += "codes.quine" %% "dali-core" % "0.2.0",
     libraryDependencies += "codes.quine" %% "dali-cats" % "0.2.0",
     libraryDependencies += "io.monix" %% "minitest" % "2.7.0" % Test,
