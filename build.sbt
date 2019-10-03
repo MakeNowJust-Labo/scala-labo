@@ -37,6 +37,14 @@ lazy val root = project
     addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
     libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full),
     commonSettings,
+    initialCommands in console :=
+      """
+        |import codes.quine.labo._
+        |import codes.quine.labo.neko._
+        |import codes.quine.labo.neko.syntax._
+        |import codes.quine.labo.neko.data._
+        |import codes.quine.labo.neko.instances._
+      """.stripMargin
   )
   .dependsOn(nekoCore, nekoFree)
   .aggregate(nekoCore, nekoFree)
