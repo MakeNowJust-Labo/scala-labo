@@ -14,6 +14,7 @@ final case class ReaderT[F[_], E, A](run: E => F[A]) {
 object ReaderT extends ReaderTInstances0 {
   def run[F[_], E, A](fa: ReaderT[F, E, A])(e: E): F[A] = fa.run(e)
 
+  def lift[F[_], E, A](fa: F[A]): ReaderT[F, E, A] = ReaderT(_ => fa)
   def pure[F[_]: Applicative, E, A](a: A): ReaderT[F, E, A] = ReaderT(e => Applicative[F].pure(a))
 
   def ask[F[_]: Applicative, E]: ReaderT[F, E, E] = ReaderT(e => Applicative[F].pure(e))
@@ -63,7 +64,7 @@ private[data] trait ReaderTInstances0 extends ReaderTInstances1 {
       val monad: Monad[ReaderT[G, E, *]] = readerTMonadInstance
       val innerMonad: Monad[G] = Monad[G]
 
-      def lift[A](ga: G[A]): ReaderT[G, E, A] = ReaderT(_ => ga)
+      def lift[A](ga: G[A]): ReaderT[G, E, A] = ReaderT.lift(ga)
       def transMap[A](fa: ReaderT[G, E, A])(t: G ~> G): ReaderT[G, E, A] =
         ReaderT(e => t(fa.run(e)))
 

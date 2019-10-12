@@ -46,10 +46,10 @@ lazy val root = project
         |import codes.quine.labo.neko.instances._
       """.stripMargin
   )
-  .dependsOn(nekoCore, nekoFree)
-  .aggregate(nekoCore, nekoFree)
+  .dependsOn(`neko-core`, `neko-free`, `neko-rec`)
+  .aggregate(`neko-core`, `neko-free`, `neko-rec`)
 
-lazy val nekoCore = project
+lazy val `neko-core` = project
   .in(file("modules/neko-core"))
   .settings(
     name := "neko-core",
@@ -61,7 +61,7 @@ lazy val nekoCore = project
     commonSettings
   )
 
-lazy val nekoFree = project
+lazy val `neko-free` = project
   .in(file("modules/neko-free"))
   .settings(
     name := "neko-free",
@@ -69,4 +69,14 @@ lazy val nekoFree = project
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     commonSettings
   )
-  .dependsOn(nekoCore)
+  .dependsOn(`neko-core`)
+
+lazy val `neko-rec` = project
+  .in(file("modules/neko-rec"))
+  .settings(
+    name := "neko-rec",
+    libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    commonSettings
+  )
+  .dependsOn(`neko-core`)

@@ -15,6 +15,9 @@ final case class WriterT[F[_], L, A](run: F[(L, A)]) {
 object WriterT extends WriterTInstances0 {
   def run[F[_], L, A](fa: WriterT[F, L, A]): F[(L, A)] = fa.run
 
+  def lift[F[_]: Functor, L: Monoid, A](fa: F[A]): WriterT[F, L, A] = WriterT(fa.map((Monoid[L].empty, _)))
+  def pure[F[_]: Applicative, L: Monoid, A](a: A): WriterT[F, L, A] = WriterT(Applicative[F].pure((Monoid[L].empty, a)))
+
   def tell[F[_]: Applicative, L](l: L): WriterT[F, L, Unit] = WriterT(Applicative[F].pure((l, ())))
   def listen[F[_]: Functor, L, A](fa: WriterT[F, L, A]): WriterT[F, L, (L, A)] =
     WriterT(fa.run.map { case (l, a) => (l, (l, a)) })
@@ -55,7 +58,7 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
 
   implicit def writerTApplicativeInstance[F[_]: Applicative, L: Monoid]: Applicative[WriterT[F, L, *]] =
     new Applicative[WriterT[F, L, *]] {
-      def pure[A](a: A): WriterT[F, L, A] = WriterT(Applicative[F].pure((Monoid[L].empty, a)))
+      def pure[A](a: A): WriterT[F, L, A] = WriterT.pure(a)
       override def map[A, B](fa: WriterT[F, L, A])(f: A => B): WriterT[F, L, B] = fa.map(f)
       def ap[A, B](ff: WriterT[F, L, A => B])(fa: WriterT[F, L, A]): WriterT[F, L, B] =
         WriterT(Applicative[F].map2(ff.run, fa.run) { case ((l1, f), (l2, a)) => (l1 |+| l2, f(a)) })
@@ -69,7 +72,7 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
     }
 
   implicit def writerTMonadInstance[F[_]: Monad, L: Monoid]: Monad[WriterT[F, L, *]] = new Monad[WriterT[F, L, *]] {
-    def pure[A](a: A): WriterT[F, L, A] = WriterT(Monad[F].pure((Monoid[L].empty, a)))
+    def pure[A](a: A): WriterT[F, L, A] = WriterT.pure(a)
     override def map[A, B](fa: WriterT[F, L, A])(f: A => B): WriterT[F, L, B] = fa.map(f)
     override def flatMap[A, B](fa: WriterT[F, L, A])(f: A => WriterT[F, L, B]): WriterT[F, L, B] = fa.flatMap(f)
     def tailRecM[A, B](a: A)(f: A => WriterT[F, L, Either[A, B]]): WriterT[F, L, B] = WriterT.tailRecM(a)(f)
@@ -82,7 +85,7 @@ private[data] trait WriterTInstances0 extends WriterTInstances1 {
       val monad: Monad[WriterT[G, L, *]] = writerTMonadInstance
       val innerMonad: Monad[G] = Monad[G]
 
-      def lift[A](ga: G[A]): WriterT[G, L, A] = WriterT(ga.map((Monoid[L].empty, _)))
+      def lift[A](ga: G[A]): WriterT[G, L, A] = WriterT.lift(ga)
       def transMap[A](fa: WriterT[G, L, A])(t: G ~> G): WriterT[G, L, A] =
         WriterT(t(fa.run))
 
@@ -121,7 +124,7 @@ private[data] trait WriterTInstances1 {
 
   implicit def writerTAlternativeInstance[F[_]: Alternative, L: Monoid]: Alternative[WriterT[F, L, *]] =
     new Alternative[WriterT[F, L, *]] {
-      def pure[A](a: A): WriterT[F, L, A] = WriterT(Applicative[F].pure((Monoid[L].empty, a)))
+      def pure[A](a: A): WriterT[F, L, A] = WriterT.pure(a)
       override def map[A, B](fa: WriterT[F, L, A])(f: A => B): WriterT[F, L, B] = fa.map(f)
       def ap[A, B](ff: WriterT[F, L, A => B])(fa: WriterT[F, L, A]): WriterT[F, L, B] =
         WriterT(Applicative[F].map2(ff.run, fa.run) { case ((l1, f), (l2, a)) => (l1 |+| l2, f(a)) })

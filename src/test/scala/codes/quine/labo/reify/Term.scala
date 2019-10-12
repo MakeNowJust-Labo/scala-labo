@@ -1,7 +1,8 @@
 package codes.quine.labo
 package reify
 
-import neko._, data._
+import neko._, neko.data._
+import neko.rec.data._
 
 sealed trait TermF[A]
 final case class AndF[A](l: A, r: A) extends TermF[A]
@@ -35,23 +36,16 @@ object TermF {
       case VarF(name)   => Applicative[G].pure(VarF(name))
     }
   }
-}
 
-final case class Term(phi: TermF[Term]) { p =>
-  def &&(q: Term): Term = Term(AndF(p, q))
-  def ||(q: Term): Term = Term(OrF(p, q))
-  def unary_~(): Term = Term(NotF(p))
-  def ->(q: Term): Term = Term(ImplyF(p, q))
-  def <->(q: Term): Term = (p -> q) && (q -> p)
-}
+  type Term = Mu[TermF]
 
-object Term {
-  implicit val termMuRefInstance: MuRef.Aux[Term, TermF] = new MuRef[Term] {
-    type DeRef[A] = TermF[A]
+  def Var(name: String): Term = Mu(VarF(name))
 
-    def mapDeRef[F[_]: Applicative, R](a: Term)(f: MuRefFunction[F, TermF, R]): F[TermF[R]] =
-      Traverse[TermF].traverse(a.phi)(a => f(a))
+  implicit class TermOps(val t: Term) {
+    def &&(u: Term): Term = Mu(AndF(t, u))
+    def ||(u: Term): Term = Mu(OrF(t, u))
+    def ->(u: Term): Term = Mu(ImplyF(t, u))
+    def <->(u: Term): Term = (t -> u) && (u -> t)
+    def `unary_~` : Term = Mu(NotF(t))
   }
-
-  def Var(name: String): Term = Term(VarF(name))
 }

@@ -63,6 +63,21 @@ private[instances] trait OptionInstances1 { self: OptionInstances0 =>
     def concatK[A](x: Option[A], y: Option[A]): Option[A] = x.orElse(y)
   }
 
+  implicit val optionTraverseInstance: Traverse[Option] = new Traverse[Option] {
+    def traverse[G[_]: Applicative, A, B](fa: Option[A])(f: A => G[B]): G[Option[B]] = fa match {
+      case None    => Applicative[G].pure(None)
+      case Some(a) => f(a).map(Some(_))
+    }
+    def foldLeft[A, B](fa: Option[A], b: B)(f: (B, A) => B): B = fa match {
+      case None    => b
+      case Some(a) => f(b, a)
+    }
+    def foldRight[A, B](fa: Option[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
+      case None    => lb
+      case Some(a) => Eval.defer(f(a, lb))
+    }
+  }
+
   implicit val optionCoflatMapInstance: CoflatMap[Option] = new CoflatMap[Option] {
     def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
     def coflatMap[A, B](fa: Option[A])(f: Option[A] => B): Option[B] = fa match {

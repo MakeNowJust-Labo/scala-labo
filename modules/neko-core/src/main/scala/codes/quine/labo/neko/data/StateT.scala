@@ -22,6 +22,7 @@ object StateT extends StateTInstances0 {
   def exec[F[_]: Functor, S, A](fa: StateT[F, S, A])(s: S): F[S] = run(fa)(s).map(_._1)
   def eval[F[_]: Functor, S, A](fa: StateT[F, S, A])(s: S): F[A] = run(fa)(s).map(_._2)
 
+  def lift[F[_]: Functor, S, A](fa: F[A]): StateT[F, S, A] = StateT(s => fa.map((s, _)))
   def pure[F[_], S, A](a: A)(implicit F: Applicative[F]): StateT[F, S, A] = StateT(s => F.pure((s, a)))
 
   def get[F[_], S](implicit F: Applicative[F]): StateT[F, S, S] = StateT(s => F.pure((s, s)))
@@ -60,7 +61,7 @@ private[data] trait StateTInstances0 {
       val monad: Monad[StateT[G, S, *]] = stateTMonadInstance
       val innerMonad: Monad[G] = Monad[G]
 
-      def lift[A](ga: G[A]): StateT[G, S, A] = StateT(s => ga.map((s, _)))
+      def lift[A](ga: G[A]): StateT[G, S, A] = StateT.lift(ga)
       def transMap[A](fa: StateT[G, S, A])(t: G ~> G): StateT[G, S, A] =
         StateT(s => t(fa.run(s)))
 
