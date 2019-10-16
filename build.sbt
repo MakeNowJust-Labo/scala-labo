@@ -46,8 +46,8 @@ lazy val root = project
         |import codes.quine.labo.neko.instances._
       """.stripMargin
   )
-  .dependsOn(`neko-core`, `neko-free`, `neko-rec`)
-  .aggregate(`neko-core`, `neko-free`, `neko-rec`)
+  .dependsOn(`neko-core`, `neko-free`, `neko-rec`, `hollow`)
+  .aggregate(`neko-core`, `neko-free`, `neko-rec`, `hollow`)
 
 lazy val `neko-core` = project
   .in(file("modules/neko-core"))
@@ -78,5 +78,20 @@ lazy val `neko-rec` = project
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
     commonSettings
+  )
+  .dependsOn(`neko-core`)
+
+lazy val `hollow` = project
+  .in(file("modules/hollow"))
+  .settings(
+    name := "hollow",
+    libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    commonSettings,
+    initialCommands in console :=
+      """
+        |import codes.quine.labo.hollow._
+        |import codes.quine.labo.hollow.Parser._
+      """.stripMargin
   )
   .dependsOn(`neko-core`)
