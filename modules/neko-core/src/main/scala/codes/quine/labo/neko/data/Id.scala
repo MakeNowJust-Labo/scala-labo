@@ -41,8 +41,9 @@ private[data] trait IdInstances0 extends IdInstances1 {
 
 private[data] trait IdInstances1 {
   implicit val idTraverseInstance: Traverse[Id] = new Traverse[Id] {
-    def foldLeft[A, B](fa: Id[A], b: B)(f: (B, A) => B): B = f(b, fa.value)
-    def foldRight[A, B](fa: Id[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = Eval.defer(f(fa.value, lb))
+    override def foldLeft[A, B](fa: Id[A], b: B)(f: (B, A) => B): B = f(b, fa.value)
+    override def foldRight[A, B](fa: Id[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] =
+      Eval.defer(f(fa.value, lb))
 
     def traverse[G[_]: Applicative, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] = f(fa.value).map(Id(_))
   }

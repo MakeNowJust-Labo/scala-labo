@@ -2,13 +2,22 @@ package codes.quine.labo
 package neko
 package laws
 
-import data._, syntax._
+import data._, syntax._, instances.list._
 
 trait TraverseLaws[F[_]] {
   implicit val F: Traverse[F]
 
   def traverseIdentity[A, B](fa: F[A], f: A => B): IsEq[F[B]] =
     fa.map(f) <-> fa.traverse[Id, B](a => Id(f(a))).value
+
+  def traverseFoldMap[A, M: Monoid](fa: F[A], f: A => M): IsEq[M] =
+    fa.foldMap(f) <-> fa.traverse(a => Const[M, M](f(a))).value
+
+  def traverseFoldLeft[A, B](fa: F[A], b: B, f: (B, A) => B): IsEq[B] =
+    fa.foldLeft(b)(f) <-> fa.foldMap(a => List(a)).foldLeft(b)(f)
+
+  def traverseFoldRight[A, B](fa: F[A], lb: Eval[B], f: (A, Eval[B]) => Eval[B]): IsEq[Eval[B]] =
+    fa.foldRight(lb)(f) <-> fa.foldMap(a => Endo.lift[Eval[B]](lb => f(a, lb)))(MonoidK[Endo].algebra).apply(lb)
 
   def traverseSequentialComposition[G[_], H[_], A, B, C](fa: F[A], f: A => G[B], g: B => H[C])(
     implicit G: Applicative[G],

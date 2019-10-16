@@ -71,6 +71,9 @@ object NekoLaw {
   val traverse: NekoLaw = law("traverse")
   val traverseAll: NekoLaw = all(traverse)
   val traverseIdentity: NekoLaw = law0(traverse, "identity")
+  val traverseFoldMap: NekoLaw = law0(traverse, "foldMap")
+  val traverseFoldLeft: NekoLaw = law0(traverse, "foldLeft")
+  val traverseFoldRight: NekoLaw = law0(traverse, "foldRight")
   val traverseSequentialComposition: NekoLaw = law0(traverse, "sequential composition")
   val traverseParallelComposition: NekoLaw = law0(traverse, "parallel composition")
 

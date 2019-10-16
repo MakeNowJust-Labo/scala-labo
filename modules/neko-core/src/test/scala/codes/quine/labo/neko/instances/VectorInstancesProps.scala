@@ -3,12 +3,9 @@ package neko
 package instances
 
 import scalaprops._
-import data._, props._
+import data._, props._, test._
 
 object VectorInstancesProps extends Scalaprops {
-  implicit val stringGenInstance: Gen[String] = Gen.asciiString
-  implicit def idGenInstance[A](implicit ga: Gen[A]): Gen[Id[A]] = Gen[A].map(Id(_))
-
   val laws = Properties.list(
     OrdProps[Vector[Int]].all,
     HashProps[Vector[Int]].all,

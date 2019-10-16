@@ -92,8 +92,8 @@ private[instances] trait VectorInstances1 { self: VectorInstances0 =>
   }
 
   implicit val vectorTraverseInstance: Traverse[Vector] = new Traverse[Vector] {
-    def foldLeft[A, B](fa: Vector[A], b: B)(f: (B, A) => B): B = fa.foldLeft(b)(f)
-    def foldRight[A, B](fa: Vector[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
+    override def foldLeft[A, B](fa: Vector[A], b: B)(f: (B, A) => B): B = fa.foldLeft(b)(f)
+    override def foldRight[A, B](fa: Vector[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = {
       def loop(fa: Vector[A]): Eval[B] = fa match {
         case Vector() => lb
         case x +: xs  => f(x, Eval.defer(loop(xs)))

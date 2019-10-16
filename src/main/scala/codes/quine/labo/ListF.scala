@@ -13,15 +13,6 @@ object ListF {
       case NilF()      => Applicative[G].pure(NilF())
       case ConsF(t, a) => f(a).map(ConsF(t, _))
     }
-
-    def foldLeft[A, B](fa: ListF[T, A], b: B)(f: (B, A) => B): B = fa match {
-      case NilF()      => b
-      case ConsF(t, a) => f(b, a)
-    }
-    def foldRight[A, B](fa: ListF[T, A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
-      case NilF()      => lb
-      case ConsF(t, a) => Eval.defer(f(a, lb))
-    }
   }
 
   type MuList[T] = Mu[ListF[T, *]]

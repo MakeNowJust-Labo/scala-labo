@@ -68,11 +68,11 @@ private[instances] trait OptionInstances1 { self: OptionInstances0 =>
       case None    => Applicative[G].pure(None)
       case Some(a) => f(a).map(Some(_))
     }
-    def foldLeft[A, B](fa: Option[A], b: B)(f: (B, A) => B): B = fa match {
+    override def foldLeft[A, B](fa: Option[A], b: B)(f: (B, A) => B): B = fa match {
       case None    => b
       case Some(a) => f(b, a)
     }
-    def foldRight[A, B](fa: Option[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
+    override def foldRight[A, B](fa: Option[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
       case None    => lb
       case Some(a) => Eval.defer(f(a, lb))
     }
