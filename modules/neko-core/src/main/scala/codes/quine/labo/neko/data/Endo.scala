@@ -14,7 +14,7 @@ object Endo extends EndoInstances {
 }
 
 private[data] trait EndoInstances {
-  implicit def endoMonoidInstance[A]: MonoidK[Endo] = new MonoidK[Endo] {
+  implicit val endoMonoidInstance: MonoidK[Endo] = new MonoidK[Endo] {
     def emptyK[A]: Endo[A] = Endo.empty
     def concatK[A](x: Endo[A], y: Endo[A]): Endo[A] = x.compose(y)
   }
