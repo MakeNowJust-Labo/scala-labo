@@ -13,14 +13,14 @@ final case class VarF[A](name: String) extends TermF[A]
 
 object TermF {
   implicit val termFTraverseInstance: Traverse[TermF] = new Traverse[TermF] {
-    def foldLeft[A, B](fa: TermF[A], b: B)(f: (B, A) => B): B = fa match {
+    override def foldLeft[A, B](fa: TermF[A], b: B)(f: (B, A) => B): B = fa match {
       case AndF(l, r)   => f(f(b, l), r)
       case OrF(l, r)    => f(f(b, l), r)
       case ImplyF(l, r) => f(f(b, l), r)
       case NotF(n)      => f(b, n)
       case VarF(_)      => b
     }
-    def foldRight[A, B](fa: TermF[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
+    override def foldRight[A, B](fa: TermF[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = fa match {
       case AndF(l, r)   => Eval.defer(f(l, Eval.defer(f(r, lb))))
       case OrF(l, r)    => Eval.defer(f(l, Eval.defer(f(r, lb))))
       case ImplyF(l, r) => Eval.defer(f(l, Eval.defer(f(r, lb))))
