@@ -17,8 +17,8 @@ val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-diagrams", "-diagrams-max-classes", "10"),
   // resolvers += Resolver.sonatypeRepo("releases"),
   // resolvers += Resolver.sonatypeRepo("snapshots"),
-  addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0"),
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+  addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 )
 
 lazy val root = project
@@ -40,6 +40,7 @@ lazy val root = project
     initialCommands in console :=
       """
         |import codes.quine.labo._
+        |import codes.quine.labo.data._
         |import codes.quine.labo.neko._
         |import codes.quine.labo.neko.syntax._
         |import codes.quine.labo.neko.data._
@@ -54,7 +55,7 @@ lazy val `neko-core` = project
   .settings(
     name := "neko-core",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
     libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.1",
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
@@ -66,7 +67,7 @@ lazy val `neko-free` = project
   .settings(
     name := "neko-free",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
     commonSettings
   )
   .dependsOn(`neko-core`)
@@ -76,7 +77,7 @@ lazy val `neko-rec` = project
   .settings(
     name := "neko-rec",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
     commonSettings
   )
   .dependsOn(`neko-core`)
@@ -86,7 +87,7 @@ lazy val `hollow` = project
   .settings(
     name := "hollow",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+    libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
     commonSettings,
     initialCommands in console :=
       """
