@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.13.0"
+ThisBuild / scalaVersion := "2.13.1"
 ThisBuild / scalacOptions ++= Seq(
   "-deprecation",
   "-encoding",
@@ -34,8 +34,8 @@ lazy val root = project
     testFrameworks += new TestFramework("minitest.runner.Framework"),
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
-    addCompilerPlugin(("com.github.ghik" % "silencer-plugin" % "1.4.3").cross(CrossVersion.full)),
-    libraryDependencies += ("com.github.ghik" % "silencer-lib" % "1.4.3" % Provided).cross(CrossVersion.full),
+    addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.4.4" cross CrossVersion.full),
+    libraryDependencies += "com.github.ghik" % "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
     commonSettings,
     initialCommands in console :=
       """
@@ -56,9 +56,9 @@ lazy val `neko-core` = project
     name := "neko-core",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
-    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.1",
+    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.2",
     scalapropsSettings,
-    scalapropsVersion := "0.6.1",
+    scalapropsVersion := "0.6.2",
     commonSettings
   )
 
