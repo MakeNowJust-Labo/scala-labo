@@ -25,17 +25,17 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "labo",
-    libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0",
+    libraryDependencies += "org.typelevel" %% "cats-core" % "2.1.0",
     libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3",
-    libraryDependencies += "eu.timepit" %% "singleton-ops" % "0.4.0",
+    libraryDependencies += "eu.timepit" %% "singleton-ops" % "0.4.3",
     libraryDependencies += "codes.quine" %% "dali-core" % "0.2.0",
     libraryDependencies += "codes.quine" %% "dali-cats" % "0.2.0",
     libraryDependencies += "io.monix" %% "minitest" % "2.7.0" % Test,
     testFrameworks += new TestFramework("minitest.runner.Framework"),
     scalapropsSettings,
     scalapropsVersion := "0.6.1",
-    addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.4.4" cross CrossVersion.full),
-    libraryDependencies += "com.github.ghik" % "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
+    addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full),
+    libraryDependencies += "com.github.ghik" % "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full,
     commonSettings,
     initialCommands in console :=
       """
@@ -56,9 +56,9 @@ lazy val `neko-core` = project
     name := "neko-core",
     libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.typelevel" %% "simulacrum" % "1.0.0",
-    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.2",
+    libraryDependencies += "com.github.scalaprops" %% "scalaprops-core" % "0.6.3",
     scalapropsSettings,
-    scalapropsVersion := "0.6.2",
+    scalapropsVersion := "0.6.3",
     commonSettings
   )
 

@@ -5,7 +5,5 @@ import scalaprops._
 import TestTWDFA._
 
 object TWDFAProps extends Scalaprops {
-  val convert = Property.forAll { (xs: List[Σ]) =>
-    M.run(xs) == D.run(xs)
-  }
+  val convert = Property.forAll((xs: List[Σ]) => M.run(xs) == D.run(xs))
 }
